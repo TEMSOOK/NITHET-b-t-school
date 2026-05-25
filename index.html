@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NITHET — ระบบนิเทศ ติดตาม สพป.เชียงใหม่ เขต 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f7f8fa;--bg2:#eef0f5;--bg3:#e4e7ef;--white:#fff;
+  --navy:#1a2c5b;--navy2:#243a72;--navy3:#2e4a8a;
+  --gold:#b8860b;--gold2:#d4a017;--gold3:#f0c040;--gold-bg:#fffbec;
+  --t1:#0f172a;--t2:#1e293b;--t3:#475569;--t4:#94a3b8;
+  --border:#dde1eb;--border2:#c8cdd9;
+  --sh1:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --sh2:0 2px 8px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.06);
+  --done:#15803d;--done-bg:#f0fdf4;--done-b:#86efac;
+  --prog:#1d4ed8;--prog-bg:#eff6ff;--prog-b:#93c5fd;
+  --nyet:#b91c1c;--nyet-bg:#fef2f2;--nyet-b:#fca5a5;
+  --warn:#92400e;--warn-bg:#fffbeb;--warn-b:#fde68a;
+  --r1:7px;--r2:12px;--r3:18px;--r4:26px;
+  --sb:272px;--top:54px;--ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg);color:var(--t1);line-height:1.65;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.page{display:none}.page.active{display:block}
+.sb{width:var(--sb);position:fixed;left:0;top:0;bottom:0;z-index:300;background:var(--navy);display:flex;flex-direction:column;transition:transform .3s var(--ease);box-shadow:4px 0 24px rgba(26,44,91,.18)}
+.sb-brand{padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08);position:relative}
+.sb-logo{font-family:'Noto Serif Thai',serif;font-size:24px;font-weight:800;color:#fff;line-height:1;margin-bottom:5px}
+.sb-logo span{color:var(--gold3)}
+.sb-badge{display:inline-block;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold3);background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.22);padding:3px 9px;border-radius:20px;margin-bottom:4px}
+.sb-sub{font-size:10.5px;color:rgba(255,255,255,.38);line-height:1.45}
+.sb-close{display:none;position:absolute;right:12px;top:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);width:26px;height:26px;border-radius:6px;font-size:12px;cursor:pointer;align-items:center;justify-content:center;transition:all .18s}
+.sb-close:hover{background:rgba(255,255,255,.16);color:#fff}
+.sb-nav{flex:1;padding:10px;overflow-y:auto;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.nav-grp{font-size:9.5px;font-weight:700;letter-spacing:.15em;color:rgba(255,255,255,.22);text-transform:uppercase;padding:14px 10px 5px}
+.ni{display:flex;align-items:center;gap:9px;width:100%;padding:8px 11px;border:none;background:transparent;color:rgba(255,255,255,.5);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;text-align:left;border-radius:var(--r1);cursor:pointer;transition:all .16s;margin-bottom:1px;line-height:1.35}
+.ni:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.84)}
+.ni.active{background:rgba(255,255,255,.1);border-left:3px solid var(--gold3);padding-left:8px;color:#fff;font-weight:500}
+.ni.active .ni-n{background:var(--gold2);color:var(--navy)}
+.ni-ico{font-size:13px;flex-shrink:0;width:18px;text-align:center;opacity:.55}
+.ni-n{flex-shrink:0;width:20px;height:20px;border-radius:5px;background:rgba(255,255,255,.1);color:var(--gold3);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ni-label{flex:1}
+.ni-bdg{flex-shrink:0;font-size:10px;font-weight:600;background:rgba(255,255,255,.1);color:rgba(255,255,255,.38);padding:1px 7px;border-radius:20px;min-width:22px;text-align:center}
+.ni.complete .ni-bdg{background:rgba(21,128,61,.3);color:#86efac}
+.sb-ft{padding:14px 18px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-pl{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.38);margin-bottom:7px}
+.sb-pl span:last-child{font-weight:700;color:var(--gold3)}
+.sb-pb{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.sb-pf{height:100%;width:0%;background:linear-gradient(90deg,var(--gold2),var(--gold3));border-radius:2px;transition:width .5s var(--ease)}
+.topbar{position:fixed;top:0;left:var(--sb);right:0;z-index:200;height:var(--top);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:12px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.tb-menu{display:none;flex-direction:column;gap:4.5px;background:none;border:none;cursor:pointer;padding:4px}
+.tb-menu span{display:block;width:20px;height:2px;background:var(--navy);border-radius:1px}
+.tb-info{flex:1}
+.tb-info h2{font-family:'Noto Serif Thai',serif;font-size:13.5px;font-weight:700;color:var(--navy);line-height:1.2}
+.tb-info p{font-size:11px;color:var(--t4)}
+.tb-acts{display:flex;align-items:center;gap:8px}
+.tab-pill{display:flex;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:3px;gap:2px}
+.tab-btn{padding:5px 12px;border-radius:8px;border:none;background:transparent;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12.5px;color:var(--t3);cursor:pointer;transition:all .16s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tab-btn:hover{color:var(--t2)}
+.tab-btn.active{background:var(--white);color:var(--navy);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.btn-icon{width:34px;height:34px;border-radius:var(--r1);border:1px solid var(--border);background:var(--white);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s;flex-shrink:0}
+.btn-icon:hover{border-color:var(--navy3);color:var(--navy)}
+.btn-save{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--navy);color:#fff;border:none;border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(26,44,91,.25)}
+.btn-save:hover{background:var(--navy2);transform:translateY(-1px)}
+.btn-save:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-ai{display:flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.btn-ai:hover{opacity:.9;transform:translateY(-1px)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(14px);z-index:9999;opacity:0;pointer-events:none;background:var(--navy);color:#fff;padding:11px 22px;border-radius:var(--r4);font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.18);white-space:nowrap;max-width:92vw;transition:all .3s var(--ease)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#15803d}.toast.err{background:#b91c1c}
+.sb-ov{display:none;position:fixed;inset:0;z-index:290;background:rgba(15,23,42,.45);backdrop-filter:blur(3px)}
+.main{margin-left:var(--sb);padding-top:var(--top);min-height:100vh}
+.content{padding:26px 28px 80px;max-width:1400px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;box-shadow:var(--sh1);transition:box-shadow .18s}
+.card:hover{box-shadow:var(--sh2)}
+.card-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:'Noto Serif Thai',serif;font-size:14px;font-weight:700;color:var(--navy)}
+.card-sub{font-size:11px;color:var(--t4)}
+.pg-hd{margin-bottom:20px}
+.pg-hd h1{font-family:'Noto Serif Thai',serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.pg-hd p{font-size:13px;color:var(--t3)}
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 55%,#1a3a6e 100%);border-radius:var(--r4);padding:30px 34px 26px;margin-bottom:20px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(240,192,64,.15) 0%,transparent 65%);pointer-events:none}
+.hero-eye{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold3)}
+.hero-eye::before,.hero-eye::after{content:'';width:16px;height:1px;background:var(--gold3);opacity:.6}
+.hero-h1{font-family:'Noto Serif Thai',serif;font-size:22px;font-weight:800;color:#fff;line-height:1.38;margin-bottom:4px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.42);margin-bottom:26px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:var(--r3);padding:14px 16px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:2px}
+.kpi.g::after{background:linear-gradient(90deg,var(--gold2),var(--gold3))}
+.kpi.gr::after{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.kpi.bl::after{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+.kpi.rd::after{background:linear-gradient(90deg,#dc2626,#f87171)}
+.kpi-lbl{font-size:11px;color:rgba(255,255,255,.42);margin-bottom:6px}
+.kpi-n{font-family:'Noto Serif Thai',serif;font-size:32px;font-weight:800;line-height:1;color:#fff;margin-bottom:3px}
+.kpi-n.gold{color:var(--gold3)}
+.kpi-s{font-size:11px;color:rgba(255,255,255,.3)}
+.kpi-track{height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden}
+.kpi-bar{height:100%;border-radius:2px;transition:width .7s var(--ease)}
+.kpi.g .kpi-bar{background:linear-gradient(90deg,var(--gold2),var(--gold3))}
+.kpi.gr .kpi-bar{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.kpi.bl .kpi-bar{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+.kpi.rd .kpi-bar{background:linear-gradient(90deg,#dc2626,#f87171)}
+.dgrid{display:grid;grid-template-columns:1fr 300px;gap:18px;margin-bottom:18px}
+.sch-row{display:grid;grid-template-columns:1fr 70px 70px 70px 70px 120px;align-items:center;gap:8px;padding:11px 20px;border-bottom:1px solid var(--bg2);transition:background .12s}
+.sch-row:last-child{border-bottom:none}
+.sch-row:hover{background:var(--bg)}
+.sch-row.hdr{background:var(--bg);border-bottom:1px solid var(--border)}
+.sch-row.hdr span{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--t4);text-transform:uppercase;text-align:center}
+.sch-row.hdr span:first-child{text-align:left}
+.sch-name{font-size:13px;font-weight:500;color:var(--navy)}
+.sch-date{font-size:11px;color:var(--t4)}
+.sch-stat{text-align:center}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.chip.done{background:var(--done-bg);color:var(--done);border:1px solid var(--done-b)}
+.chip.prog{background:var(--prog-bg);color:var(--prog);border:1px solid var(--prog-b)}
+.chip.nyet{background:var(--nyet-bg);color:var(--nyet);border:1px solid var(--nyet-b)}
+.chip.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-b)}
+.btn-xs{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:var(--r1);border:1px solid var(--border);background:var(--bg);color:var(--navy);cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-xs:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.sch-empty{padding:40px;text-align:center;color:var(--t4);font-size:13px;line-height:1.7}
+.donut-wrap{display:flex;align-items:center;justify-content:center;padding:20px 20px 12px}
+.donut-box{position:relative;width:126px;height:126px}
+.donut-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut-ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-pct{font-family:'Noto Serif Thai',serif;font-size:24px;font-weight:800;color:var(--navy)}
+.donut-lbl{font-size:10px;color:var(--t4)}
+.leg-list{padding:0 18px 16px;display:flex;flex-direction:column;gap:7px}
+.leg-row{display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:var(--r1);padding:3px 6px;transition:background .12s}
+.leg-row:hover{background:var(--bg2)}
+.leg-row.has-missing{background:var(--warn-bg);border:1px solid var(--warn-b);padding:5px 8px}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.leg-dot.done{background:var(--done)}.leg-dot.prog{background:var(--prog)}.leg-dot.nyet{background:var(--nyet)}.leg-dot.mt{background:var(--bg3)}
+.leg-name{flex:1;font-size:12.5px;color:var(--t2)}
+.leg-name.warn{color:var(--warn);font-weight:600}
+.leg-n{font-size:12.5px;font-weight:600;color:var(--t1);min-width:22px;text-align:right}
+.leg-pct{font-size:11px;color:var(--t4);min-width:32px;text-align:right}
+.leg-arrow{font-size:11px;color:var(--warn);margin-left:3px}
+.missing-panel{margin:0 16px 16px;background:var(--warn-bg);border:1px solid var(--warn-b);border-radius:var(--r2);overflow:hidden;display:none}
+.missing-panel.open{display:block}
+.missing-panel-hd{padding:8px 12px;font-size:11.5px;font-weight:700;color:var(--warn);border-bottom:1px solid var(--warn-b)}
+.missing-item{padding:7px 12px;border-bottom:1px solid rgba(146,64,14,.08);font-size:12px;color:var(--t2);line-height:1.4;display:flex;gap:8px;align-items:start}
+.missing-item:last-child{border-bottom:none}
+.missing-id{font-size:10px;font-weight:700;color:var(--warn);flex-shrink:0;margin-top:1px}
+.cta-box{background:linear-gradient(135deg,var(--gold-bg),#fffef5);border:1.5px dashed var(--gold2);border-radius:var(--r3);padding:24px 28px;text-align:center;margin-top:4px}
+.cta-box h3{font-family:'Noto Serif Thai',serif;font-size:16px;font-weight:800;color:var(--navy);margin-bottom:7px}
+.cta-box p{font-size:13px;color:var(--t3);margin-bottom:15px}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:var(--navy);color:#fff;border:none;border-radius:var(--r2);font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(26,44,91,.28)}
+.cta-btn:hover{background:var(--navy2);transform:translateY(-2px)}
+.ai-page-grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.ai-scope-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:20px;box-shadow:var(--sh1)}
+.ai-scope-title{font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.scope-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)}
+.scope-item:last-child{border-bottom:none}
+.scope-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--navy);cursor:pointer;flex-shrink:0}
+.scope-item-name{flex:1;font-size:13px;color:var(--t2)}
+.scope-item-cnt{font-size:11.5px;color:var(--t4)}
+.ai-result-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);box-shadow:var(--sh1);overflow:hidden}
+.ai-result-hd{padding:14px 20px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.ai-result-hd h3{font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:700}
+.ai-result-hd p{font-size:11.5px;opacity:.75;margin-top:2px}
+.ai-result-body{padding:20px;font-size:13.5px;line-height:1.8;color:var(--t2)}
+.ai-prompt-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:20px;box-shadow:var(--sh1);margin-top:16px}
+.ai-prompt-title{font-size:12.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;font-size:12px;color:var(--t2);line-height:1.7;max-height:320px;overflow-y:auto;font-family:monospace;white-space:pre-wrap;word-break:break-word}
+.copy-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:12.5px;color:var(--t2);cursor:pointer;transition:all .15s;text-decoration:none}
+.copy-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.ai-note{background:var(--prog-bg);border:1px solid var(--prog-b);border-radius:var(--r2);padding:12px 16px;font-size:12.5px;color:var(--prog);line-height:1.6;margin-top:14px}
+.info-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:26px 28px;box-shadow:var(--sh2)}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
+.fg-req{color:var(--gold)}
+.fg input{padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r1);background:var(--bg);font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;color:var(--t1);outline:none;transition:all .16s}
+.fg input:focus{border-color:var(--navy3);background:var(--white);box-shadow:0 0 0 3px rgba(36,58,138,.08)}
+.info-foot{margin-top:18px;display:flex;justify-content:flex-end}
+.form-banner{background:var(--navy);border-radius:var(--r3);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.form-banner-name{font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:700;color:#fff}
+.form-banner-meta{font-size:12px;color:rgba(255,255,255,.5)}
+.domain{margin-bottom:12px}
+.dom-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;box-shadow:var(--sh1);transition:box-shadow .18s}
+.dom-card:hover{box-shadow:var(--sh2)}
+.dom-hd{display:flex;align-items:center;gap:12px;padding:0 18px;height:54px;cursor:pointer;user-select:none;transition:background .13s;border-bottom:1px solid transparent}
+.dom-hd:hover{background:var(--bg)}
+.dom-hd.open{border-bottom-color:var(--border);background:var(--bg)}
+.d-num{width:34px;height:34px;border-radius:9px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif Thai',serif;transition:all .18s}
+.dom-hd.open .d-num{background:var(--gold2);color:var(--navy)}
+.d-title{flex:1;font-size:14px;font-weight:600;color:var(--navy)}
+.d-meta{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.d-minis{display:flex;gap:4px;align-items:center}
+.d-mini{display:flex;align-items:center;gap:2px;font-size:11px;color:var(--t4)}
+.d-mdot{width:6px;height:6px;border-radius:50%}
+.d-mdot.done{background:var(--done)}.d-mdot.prog{background:var(--prog)}.d-mdot.nyet{background:var(--nyet)}
+.d-cnt{font-size:11.5px;color:var(--t4);background:var(--bg2);border:1px solid var(--border);padding:2px 9px;border-radius:20px;white-space:nowrap}
+.d-cnt.all{background:var(--done-bg);border-color:var(--done-b);color:var(--done)}
+.d-chev{width:16px;height:16px;color:var(--t4);transition:transform .2s var(--ease);flex-shrink:0}
+.dom-hd.open .d-chev{transform:rotate(180deg)}
+.dom-thead{display:grid;grid-template-columns:minmax(180px,1fr) 140px 155px 165px 185px;background:var(--bg);border-bottom:1px solid var(--border)}
+.d-th{padding:7px 12px;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--t4);text-align:center;text-transform:uppercase;border-right:1px solid var(--border)}
+.d-th:first-child{text-align:left}.d-th:last-child{border-right:none}
+.dom-body{display:flex;flex-direction:column}
+.irow{display:grid;grid-template-columns:minmax(180px,1fr) 140px 155px 165px 185px;align-items:stretch;border-bottom:1px solid var(--bg2);transition:background .12s}
+.irow:last-child{border-bottom:none}
+.irow:hover{background:#fafbff}
+.irow.s-done{background:rgba(21,128,61,.03)}.irow.s-prog{background:rgba(29,78,216,.03)}.irow.s-nyet{background:rgba(185,28,28,.03)}
+.ic{padding:11px 13px;border-right:1px solid var(--bg2);display:flex;align-items:center;justify-content:center}
+.ic:first-child{align-items:flex-start;justify-content:flex-start;flex-direction:column;gap:3px}
+.ic:last-child{border-right:none;align-items:flex-start;justify-content:flex-start}
+.i-id{font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--t4);line-height:1}
+.i-lbl{font-size:13px;color:var(--t2);line-height:1.5}
+.i-pct{display:flex;align-items:center;gap:5px;margin-top:6px}
+.i-pct input{width:54px;padding:4px 7px;border:1.5px solid var(--border);border-radius:var(--r1);background:var(--bg);font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;color:var(--t1);outline:none;transition:all .15s}
+.i-pct input:focus{border-color:var(--navy3);background:var(--white)}
+.i-pct span{font-size:11px;color:var(--t4)}
+.st-btn{width:100%;height:100%;padding:10px 6px;border-radius:var(--r1);border:1.5px solid var(--border);background:var(--bg);font-family:'IBM Plex Sans Thai',sans-serif;font-size:12.5px;color:var(--t3);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-height:44px}
+.st-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--border2)}
+.st-btn.a-done{background:var(--done-bg);border-color:var(--done-b);color:var(--done);font-weight:700}
+.st-btn.a-prog{background:var(--prog-bg);border-color:var(--prog-b);color:var(--prog);font-weight:700}
+.st-btn.a-nyet{background:var(--nyet-bg);border-color:var(--nyet-b);color:var(--nyet);font-weight:700}
+.i-note{width:100%;min-height:56px;max-height:120px;resize:vertical;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--r1);background:var(--bg);font-family:'IBM Plex Sans Thai',sans-serif;font-size:12.5px;color:var(--t1);line-height:1.5;outline:none;transition:all .16s}
+.i-note::placeholder{color:var(--t4)}
+.i-note:focus{border-color:var(--navy3);background:var(--white);box-shadow:0 0 0 3px rgba(36,58,138,.07)}
+.sign-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:26px 34px;margin-top:14px;box-shadow:var(--sh1)}
+.sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:540px;margin:0 auto 18px}
+.sign-box{display:flex;flex-direction:column;align-items:center;gap:7px;padding:0 20px}
+.sign-box:first-child{border-right:1px solid var(--border)}
+.sign-line{width:180px;height:1px;background:var(--t2);margin-bottom:5px}
+.sign-role{font-size:13px;font-weight:700;color:var(--navy);font-family:'Noto Serif Thai',serif}
+.sign-name{font-size:12.5px;color:var(--t3)}
+.sign-date{text-align:center;font-size:13px;color:var(--t3);padding-top:14px;border-top:1px solid var(--border)}
+.modal-bg{display:none;position:fixed;inset:0;z-index:500;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r3);box-shadow:0 20px 80px rgba(0,0,0,.2);width:90vw;max-width:720px;max-height:88vh;overflow-y:auto;padding:28px 32px}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:800;color:var(--navy)}
+.modal-close{background:var(--bg2);border:1px solid var(--border);color:var(--t3);width:30px;height:30px;border-radius:var(--r1);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .16s}
+.modal-close:hover{background:var(--nyet-bg);color:var(--nyet);border-color:var(--nyet-b)}
+.modal-sec{margin-bottom:16px}
+.modal-sec-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.modal-item{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid var(--bg2)}
+.modal-item:last-child{border-bottom:none}
+.modal-id{font-size:10px;font-weight:700;color:var(--t4)}
+.modal-lbl{font-size:12.5px;color:var(--t2);line-height:1.45}
+.modal-note{font-size:11.5px;color:var(--t3);font-style:italic;margin-top:3px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.anim{animation:fadeUp .3s var(--ease) both}
+.spin{animation:spin .8s linear infinite}
+@media(max-width:1080px){.kpi-row{grid-template-columns:repeat(2,1fr)}.dgrid{grid-template-columns:1fr}.ai-page-grid{grid-template-columns:1fr}}
+@media(max-width:820px){
+  :root{--sb:0px}
+  .sb{transform:translateX(-272px);width:272px}.sb.open{transform:translateX(0)}
+  .sb-ov.open{display:block}.sb-close{display:flex}.topbar{left:0}.tb-menu{display:flex}
+  .main{margin-left:0}.content{padding:16px 14px 80px}
+  .dom-thead{display:none}.irow{grid-template-columns:1fr}
+  .ic{border-right:none;border-bottom:1px solid var(--bg2);padding:10px 13px;justify-content:flex-start;align-items:flex-start}
+  .ic.scol{flex-direction:row;gap:6px;flex-wrap:nowrap;padding:8px 13px}
+  .st-btn{flex:1;font-size:11.5px;padding:8px 4px;min-height:38px;height:auto}
+  .ic:last-child{border-bottom:none}
+  .sign-grid{max-width:100%}.sign-box:first-child{border-right:none;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:4px}
+  .igrid{grid-template-columns:1fr}
+  .sch-row,.sch-row.hdr{grid-template-columns:1fr 60px 80px}
+}
+@media(max-width:560px){.tab-btn span{display:none}.btn-save span,.btn-ai span{display:none}.hero{padding:18px 14px 22px}.hero-h1{font-size:18px}}
+
+
+.ai-upload-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:20px;box-shadow:var(--sh1);margin-top:16px}
+.ai-upload-hd{display:flex;align-items:center;gap:9px;font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.ai-upload-desc{font-size:13px;color:var(--t3);margin-bottom:14px;line-height:1.6}
+.ai-drop-zone{border:2px dashed var(--border2);border-radius:var(--r2);padding:24px;text-align:center;cursor:pointer;transition:all .18s;background:var(--bg)}
+.ai-drop-zone:hover{border-color:var(--navy3);background:var(--bg2)}
+.ai-drop-zone.drag-over{border-color:var(--navy);background:var(--prog-bg)}
+.ai-result-rendered-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px;background:var(--bg);border-radius:var(--r2);margin-bottom:16px;border:1px solid var(--border)}
+.ai-result-rendered-body{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:24px 28px;box-shadow:var(--sh1);line-height:1.85;font-size:14px;color:var(--t2)}
+.ai-result-rendered-body h1,.ai-result-rendered-body h2{font-family:'Noto Serif Thai',serif;color:var(--navy);margin:20px 0 10px}
+.ai-result-rendered-body h1{font-size:18px;font-weight:800;border-bottom:2px solid var(--gold3);padding-bottom:6px}
+.ai-result-rendered-body h2{font-size:15px;font-weight:700;border-left:3px solid var(--navy);padding-left:10px}
+.ai-result-rendered-body h3{font-size:13.5px;font-weight:700;color:var(--navy3);margin:14px 0 6px}
+.ai-result-rendered-body p{margin-bottom:10px}
+.ai-result-rendered-body ul,.ai-result-rendered-body ol{margin:8px 0 12px 20px}
+.ai-result-rendered-body li{margin-bottom:5px}
+.ai-result-rendered-body strong{color:var(--t1);font-weight:700}
+.ai-result-rendered-body .section-block{background:var(--bg);border-radius:var(--r2);padding:14px 16px;margin:12px 0;border-left:3px solid var(--navy)}
+.ai-result-rendered-body .highlight-done{background:var(--done-bg);border-left:3px solid var(--done-b);padding:10px 14px;border-radius:var(--r1);margin:8px 0}
+.ai-result-rendered-body .highlight-warn{background:var(--warn-bg);border-left:3px solid var(--warn-b);padding:10px 14px;border-radius:var(--r1);margin:8px 0}
+.ai-result-rendered-body .highlight-prog{background:var(--prog-bg);border-left:3px solid var(--prog-b);padding:10px 14px;border-radius:var(--r1);margin:8px 0}
+@media print{.sb,.topbar,.btn-save,.btn-ai,.tab-pill,.btn-icon{display:none!important}.main{margin-left:0;padding-top:0}.ai-result-rendered-body{box-shadow:none;border:none;padding:0}}
+
+.ai-main-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.ai-result-rendered-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--bg);border-radius:var(--r2);margin-bottom:16px;border:1px solid var(--border);flex-wrap:wrap}
+.ai-result-rendered-body{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:22px 26px;box-shadow:var(--sh1);line-height:1.85;font-size:13.5px;color:var(--t2)}
+.ai-result-rendered-body h1{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:800;color:var(--navy);margin:18px 0 10px;border-bottom:2px solid var(--gold3);padding-bottom:5px}
+.ai-result-rendered-body h1:first-child{margin-top:0}
+.ai-result-rendered-body h2{font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:700;color:var(--navy);margin:14px 0 7px;border-left:3px solid var(--navy);padding-left:10px}
+.ai-result-rendered-body h3{font-size:13.5px;font-weight:700;color:var(--navy3);margin:11px 0 5px}
+.ai-result-rendered-body p{margin-bottom:8px}
+.ai-result-rendered-body ul,.ai-result-rendered-body ol{margin:5px 0 10px 20px}
+.ai-result-rendered-body li{margin-bottom:4px}
+.ai-result-rendered-body strong{color:var(--t1);font-weight:700}
+.ai-result-rendered-body hr{border:none;border-top:1px solid var(--border);margin:13px 0}
+@media(max-width:900px){.ai-main-grid{grid-template-columns:1fr}}
+@media print{.sb,.topbar,.tb-acts,.ai-main-grid>div:first-child{display:none!important}.main{margin-left:0;padding-top:0}.ai-result-rendered-body{box-shadow:none;border:none;padding:0}}
+
+.ai-main-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.ai-result-rendered-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--bg);border-radius:var(--r2);margin-bottom:16px;border:1px solid var(--border);flex-wrap:wrap}
+.ai-result-rendered-body{background:var(--white);border:1px solid var(--border);border-radius:var(--r3);padding:22px 26px;box-shadow:var(--sh1);line-height:1.85;font-size:13.5px;color:var(--t2)}
+.ai-result-rendered-body h1{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:800;color:var(--navy);margin:18px 0 10px;border-bottom:2px solid var(--gold3);padding-bottom:5px}
+.ai-result-rendered-body h1:first-child{margin-top:0}
+.ai-result-rendered-body h2{font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:700;color:var(--navy);margin:14px 0 7px;border-left:3px solid var(--navy);padding-left:10px}
+.ai-result-rendered-body h3{font-size:13.5px;font-weight:700;color:var(--navy3);margin:11px 0 5px}
+.ai-result-rendered-body p{margin-bottom:8px}
+.ai-result-rendered-body ul,.ai-result-rendered-body ol{margin:5px 0 10px 22px}
+.ai-result-rendered-body li{margin-bottom:5px}
+.ai-result-rendered-body strong{color:var(--t1);font-weight:700}
+.ai-result-rendered-body hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+@media(max-width:900px){.ai-main-grid{grid-template-columns:1fr}}
+@media print{
+  .sb,.topbar,.tb-acts,.ai-main-grid>div:first-child,.ai-result-rendered-hd button{display:none!important}
+  .main{margin-left:0!important;padding-top:0!important}
+  .ai-result-rendered-body{box-shadow:none;border:none;padding:0}
+}
+</style>
+</head>
+<body>
+<aside class="sb" id="sb">
+  <div class="sb-brand">
+    <div class="sb-logo">NI<span>THET</span></div>
+    <div class="sb-badge">สอง เก้า 9 A.I.T.G</div>
+    <div class="sb-sub">สพป.เชียงใหม่ เขต 2<br/>ระบบนิเทศ ติดตาม สถานศึกษา</div>
+    <button class="sb-close" id="sbClose">&#x2715;</button>
+  </div>
+  <nav class="sb-nav">
+    <button class="ni active" data-pg="dash"><span class="ni-ico">&#x25A3;</span><span class="ni-label">แดชบอร์ดรวมทุกโรงเรียน</span></button>
+    <button class="ni" data-pg="info"><span class="ni-ico">&#xFF0B;</span><span class="ni-label">เพิ่มโรงเรียนใหม่</span></button>
+    <button class="ni" data-pg="ai"><span class="ni-ico">&#x2726;</span><span class="ni-label">วิเคราะห์เชิงคุณภาพ</span></button>
+    <div class="nav-grp" id="nb-section-label" style="display:none">กำลังกรอกข้อมูล</div>
+    <button class="ni" data-pg="form" data-sec="sec-d1"><span class="ni-n">1</span><span class="ni-label">หลักสูตรสถานศึกษา</span><span class="ni-bdg" id="nb-d1">0</span></button>
+    <button class="ni" data-pg="form" data-sec="sec-d2"><span class="ni-n">2</span><span class="ni-label">กระบวนการจัดการเรียนรู้</span><span class="ni-bdg" id="nb-d2">0</span></button>
+    <button class="ni" data-pg="form" data-sec="sec-d3"><span class="ni-n">3</span><span class="ni-label">การวัดและประเมินผล</span><span class="ni-bdg" id="nb-d3">0</span></button>
+    <button class="ni" data-pg="form" data-sec="sec-d4"><span class="ni-n">4</span><span class="ni-label">สื่อ เทคโนโลยีและแหล่งเรียนรู้</span><span class="ni-bdg" id="nb-d4">0</span></button>
+    <button class="ni" data-pg="form" data-sec="sec-d5"><span class="ni-n">5</span><span class="ni-label">การประกันคุณภาพภายใน</span><span class="ni-bdg" id="nb-d5">0</span></button>
+    <button class="ni" data-pg="form" data-sec="sec-d6"><span class="ni-n">6</span><span class="ni-label">การนิเทศภายในสถานศึกษา</span><span class="ni-bdg" id="nb-d6">0</span></button>
+    <button class="ni" data-pg="form" data-sec="sec-d7"><span class="ni-n">7</span><span class="ni-label">นโยบาย จุดเน้น สพป.ชม.2</span><span class="ni-bdg" id="nb-d7">0</span></button>
+  </nav>
+  <div class="sb-ft">
+    <div class="sb-pl"><span>ความคืบหน้า (โรงเรียนปัจจุบัน)</span><span id="progPct">—</span></div>
+    <div class="sb-pb"><div class="sb-pf" id="progFill"></div></div>
+  </div>
+</aside>
+<div class="sb-ov" id="sbOv"></div>
+<div class="topbar">
+  <button class="tb-menu" id="menuBtn"><span></span><span></span><span></span></button>
+  <div class="tb-info">
+    <h2>แบบนิเทศ ติดตาม สถานศึกษา — เพื่อยกระดับคุณภาพการศึกษา</h2>
+    <p>ภาคเรียนที่ 1 ปีการศึกษา 2569 · สำนักงานเขตพื้นที่การศึกษาประถมศึกษาเชียงใหม่ เขต 2</p>
+  </div>
+  <div class="tb-acts">
+    <div class="tab-pill">
+      <button class="tab-btn active" id="tabDash" onclick="goPage('dash')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>ภาพรวม</span>
+      </button>
+      <button class="tab-btn" id="tabForm" onclick="goPage('form')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>กรอกข้อมูล</span>
+      </button>
+      <button class="tab-btn" id="tabAi" onclick="goPage('ai')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span>เชิงคุณภาพ</span>
+      </button>
+    </div>
+
+    <button class="btn-save" onclick="saveSchool()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      <span>บันทึกโรงเรียน</span>
+    </button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modalTitle">รายละเอียด</div>
+      <button class="modal-close" onclick="closeModalDirect()">&#x2715;</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="main">
+<div class="page active" id="page-dash"><div class="content">
+  <div class="hero anim">
+    <div class="hero-eye">สพป.เชียงใหม่ เขต 2</div>
+    <h1 class="hero-h1">แดชบอร์ดรวม — ทุกโรงเรียน</h1>
+    <p class="hero-sub">สรุปผลการนิเทศ ติดตาม สถานศึกษาทั้งหมดที่บันทึกไว้ในระบบ</p>
+    <div class="kpi-row">
+      <div class="kpi g"><div class="kpi-lbl">โรงเรียนที่บันทึกแล้ว</div><div class="kpi-n gold" id="kpiSchools">0</div><div class="kpi-s">โรงเรียน</div><div class="kpi-track"><div class="kpi-bar" style="width:100%"></div></div></div>
+      <div class="kpi gr"><div class="kpi-lbl">ดำเนินการแล้ว (รวม)</div><div class="kpi-n" id="kpiDone">0</div><div class="kpi-s" id="kpiDoneS">—</div><div class="kpi-track"><div class="kpi-bar" id="kpiDoneBar" style="width:0%"></div></div></div>
+      <div class="kpi bl"><div class="kpi-lbl">ระหว่างดำเนินการ (รวม)</div><div class="kpi-n" id="kpiProg">0</div><div class="kpi-s" id="kpiProgS">—</div><div class="kpi-track"><div class="kpi-bar" id="kpiProgBar" style="width:0%"></div></div></div>
+      <div class="kpi rd"><div class="kpi-lbl">ยังไม่ได้ดำเนินการ (รวม)</div><div class="kpi-n" id="kpiNyet">0</div><div class="kpi-s" id="kpiNyetS">—</div><div class="kpi-track"><div class="kpi-bar" id="kpiNyetBar" style="width:0%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="dgrid">
+    <div class="card anim" style="animation-delay:.07s">
+      <div class="card-hd">
+        <div><div class="card-title">รายชื่อโรงเรียนที่บันทึกแล้ว</div><div class="card-sub">คลิก "ดู" เพื่อดูรายละเอียดรวมถึงประเด็นที่ยังไม่ได้ระบุ</div></div>
+        <button class="btn-xs" onclick="goPage('info')" style="border-color:var(--navy);color:var(--navy)">+ เพิ่มโรงเรียน</button>
+      </div>
+      <div class="sch-row hdr"><span>โรงเรียน</span><span>ดำเนิน</span><span>ระหว่าง</span><span>ยังไม่ได้</span><span>ไม่ระบุ</span><span></span></div>
+      <div id="schoolTable"><div class="sch-empty">ยังไม่มีข้อมูลโรงเรียน<br/>กด "+ เพิ่มโรงเรียน" เพื่อเริ่มต้น</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card anim" style="animation-delay:.11s">
+        <div class="card-hd"><div class="card-title">สัดส่วนสถานะรวม</div></div>
+        <div class="donut-wrap">
+          <div class="donut-box">
+            <svg class="donut-svg" viewBox="0 0 126 126">
+              <circle cx="63" cy="63" r="46" fill="none" stroke="#e2e8f0" stroke-width="13"/>
+              <circle id="dn-done" cx="63" cy="63" r="46" fill="none" stroke="#15803d" stroke-width="13" stroke-dasharray="0 289" stroke-linecap="round"/>
+              <circle id="dn-prog" cx="63" cy="63" r="46" fill="none" stroke="#1d4ed8" stroke-width="13" stroke-dasharray="0 289" stroke-linecap="round"/>
+              <circle id="dn-nyet" cx="63" cy="63" r="46" fill="none" stroke="#b91c1c" stroke-width="13" stroke-dasharray="0 289" stroke-linecap="round"/>
+            </svg>
+            <div class="donut-ctr"><div class="donut-pct" id="dPct">0%</div><div class="donut-lbl">กรอกแล้ว</div></div>
+          </div>
+        </div>
+        <div class="leg-list">
+          <div class="leg-row"><div class="leg-dot done"></div><div class="leg-name">ดำเนินการแล้ว</div><div class="leg-n" id="lD">0</div><div class="leg-pct" id="lDp">0%</div></div>
+          <div class="leg-row"><div class="leg-dot prog"></div><div class="leg-name">ระหว่างดำเนินการ</div><div class="leg-n" id="lP">0</div><div class="leg-pct" id="lPp">0%</div></div>
+          <div class="leg-row"><div class="leg-dot nyet"></div><div class="leg-name">ยังไม่ได้ดำเนินการ</div><div class="leg-n" id="lN">0</div><div class="leg-pct" id="lNp">0%</div></div>
+          <div class="leg-row" id="missingLegRow" onclick="toggleMissingPanel()">
+            <div class="leg-dot mt"></div>
+            <div class="leg-name warn" id="missingLegName">ยังไม่ได้ระบุ</div>
+            <div class="leg-n" id="lM">0</div>
+            <div class="leg-pct" id="lMp">0%</div>
+            <div class="leg-arrow" id="missingArrow">&#x25BC;</div>
+          </div>
+        </div>
+        <div class="missing-panel" id="missingPanel">
+          <div class="missing-panel-hd" id="missingPanelHd">ประเด็นที่ยังไม่ได้ระบุ</div>
+          <div id="missingPanelBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-box anim" id="ctaBox" style="animation-delay:.15s">
+    <h3>เริ่มบันทึกโรงเรียนแรก</h3>
+    <p>กรอกข้อมูลสถานศึกษาและประเด็นนิเทศ ติดตาม ทั้ง 7 ด้าน 48 ประเด็น</p>
+    <button class="cta-btn" onclick="goPage('info')">+ เพิ่มโรงเรียนใหม่</button>
+  </div>
+</div></div>
+<div class="page" id="page-info"><div class="content">
+  <div class="pg-hd anim"><h1>ข้อมูลสถานศึกษา</h1><p>กรอกข้อมูลสำหรับโรงเรียนที่ต้องการนิเทศ ติดตาม</p></div>
+  <div class="info-card anim" style="animation-delay:.05s">
+    <div class="igrid">
+      <div class="fg"><label>ชื่อโรงเรียน <span class="fg-req">*</span></label><input id="schoolName" placeholder="ระบุชื่อโรงเรียน"/></div>
+      <div class="fg"><label>เครือข่ายพัฒนาคุณภาพอำเภอ</label><input id="network" placeholder="อำเภอ..."/></div>
+      <div class="fg"><label>ชื่อผู้บริหารสถานศึกษา</label><input id="principal" placeholder="ชื่อ-นามสกุล"/></div>
+      <div class="fg"><label>ชื่อผู้นิเทศ</label><input id="supervisor" placeholder="ชื่อ-นามสกุล"/></div>
+      <div class="fg"><label>วันที่นิเทศ</label><input type="date" id="visitDate"/></div>
+    </div>
+    <div class="info-foot"><button class="cta-btn" onclick="startForm()">เริ่มกรอกแบบนิเทศ &#x203A;</button></div>
+  </div>
+</div></div>
+<div class="page" id="page-form"><div class="content">
+  <div class="form-banner anim" id="formBanner">
+    <div>
+      <div class="form-banner-name" id="formBannerName">—</div>
+      <div class="form-banner-meta" id="formBannerMeta">—</div>
+    </div>
+    <button class="btn-save" onclick="saveSchool()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      บันทึกโรงเรียน
+    </button>
+  </div>
+  <div id="formSec"></div>
+  
+</div></div>
+<div class="page" id="page-ai"><div class="content">
+  <div class="pg-hd anim">
+    <h1>วิเคราะห์ผลการนิเทศเชิงคุณภาพ</h1>
+    <p>เลือกโรงเรียน กด "คัดลอก Prompt" นำไปวางใน Claude.ai หรือ ChatGPT แล้วนำผลวิเคราะห์มาวางในช่องด้านล่าง ระบบจะแสดงผลสรุปให้ทันที</p>
+  </div>
+  <div class="ai-main-grid">
+
+    <!-- LEFT -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Step 1: เลือกโรงเรียน -->
+      <div class="ai-scope-card anim" style="border-left:3px solid var(--navy);padding-left:17px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--t4);text-transform:uppercase;margin-bottom:8px">ขั้นที่ 1 — เลือกโรงเรียน</div>
+        <div class="ai-scope-title" style="margin-bottom:10px">เลือกโรงเรียนที่ต้องการวิเคราะห์</div>
+        <div id="aiSchoolList"><div style="color:var(--t4);font-size:13px;padding:4px 0">ยังไม่มีข้อมูลโรงเรียน กรอกข้อมูลก่อนใช้งาน</div></div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--t4)">เลือกได้ทีละ 1 โรงเรียน</span>
+          <button onclick="buildAndCopyPrompt()" style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 18px;background:var(--navy);color:#fff;border:none;border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;font-weight:600;cursor:pointer">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            คัดลอก Prompt
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: เปิด AI -->
+      <div class="ai-scope-card anim" style="animation-delay:.05s;border-left:3px solid var(--gold2);padding-left:17px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--t4);text-transform:uppercase;margin-bottom:8px">ขั้นที่ 2 — นำ Prompt ไปวางใน AI</div>
+        <div class="ai-scope-title" style="margin-bottom:10px">เปิด AI แล้ววาง Prompt ที่คัดลอกไว้</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="https://claude.ai" target="_blank" style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;font-weight:600;text-decoration:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Claude.ai
+          </a>
+          <a href="https://chat.openai.com" target="_blank" style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:var(--done);color:#fff;border:none;border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;font-weight:600;text-decoration:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            ChatGPT
+          </a>
+        </div>
+        <p style="font-size:12px;color:var(--t4);margin-top:10px;line-height:1.55">เมื่อ เชิงคุณภาพเสร็จ → เลือกข้อความทั้งหมด (Ctrl+A) → คัดลอก (Ctrl+C)</p>
+      </div>
+
+      <!-- Step 3: วางผลวิเคราะห์ -->
+      <div class="ai-scope-card anim" style="animation-delay:.1s;border-left:3px solid var(--done);padding-left:17px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--t4);text-transform:uppercase;margin-bottom:8px">ขั้นที่ 3 — วางผลวิเคราะห์เชิงคุณภาพ</div>
+        <div class="ai-scope-title" style="margin-bottom:10px">วางข้อความผลวิเคราะห์ที่ได้จาก AI</div>
+        <textarea id="aiPasteBox"
+          placeholder="วางข้อความผลวิเคราะห์จาก Claude.ai หรือ ChatGPT ที่นี่..."
+          rows="7"
+          style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--r2);background:var(--bg);font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;color:var(--t1);resize:vertical;outline:none;line-height:1.6;transition:border-color .16s"
+          onfocus="this.style.borderColor='var(--navy3)'"
+          onblur="this.style.borderColor='var(--border)'"></textarea>
+        <button onclick="renderPastedResult()" style="margin-top:10px;width:100%;padding:11px;background:var(--done);color:#fff;border:none;border-radius:var(--r1);font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          แสดงผลวิเคราะห์
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Result -->
+    <div id="aiRightPanel">
+
+      <!-- Empty state -->
+      <div id="aiEmptyState" class="card">
+        <div class="ai-result-hd"><h3>✦ ขั้นตอนการใช้งาน</h3><p>ทำตาม 3 ขั้นตอนทางซ้าย</p></div>
+        <div class="ai-result-body">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border-radius:var(--r2)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">เลือกโรงเรียน + คัดลอก Prompt</div><div style="font-size:12.5px;color:var(--t3)">ระบบจะสร้าง prompt ที่มีข้อมูลนิเทศครบถ้วนพร้อมคัดลอก</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border-radius:var(--r2)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--gold2);color:var(--navy);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">เปิด Claude.ai หรือ ChatGPT วาง Prompt</div><div style="font-size:12.5px;color:var(--t3)">AI จะวิเคราะห์ข้อมูลทั้งหมดและสรุปผลให้</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border-radius:var(--r2)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--done);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">คัดลอกผล → วางในช่อง → กดแสดง</div><div style="font-size:12.5px;color:var(--t3)">ระบบจะแสดงผลสรุปสวยงาม พร้อมพิมพ์ PDF</div></div>
+            </div>
+            <div style="padding:12px;background:var(--done-bg);border-radius:var(--r2);border:1px solid var(--done-b)">
+              <div style="font-size:12px;color:var(--done);font-weight:600;margin-bottom:4px">📋 ผลวิเคราะห์ที่ได้จาก AI จะครอบคลุม:</div>
+              <div style="font-size:12px;color:var(--t2);line-height:1.7">ภาพรวมสถิติ · ประเด็นเร่งด่วน · จุดแข็ง · ข้อเสนอแนะระยะสั้น/กลาง/ยาว · รายงานผู้บริหาร</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result display -->
+      <div id="aiResultDisplay" style="display:none" class="anim">
+        <div class="ai-result-rendered-hd">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--navy);font-family:'Noto Serif Thai',serif" id="aiResultTitle">ผลวิเคราะห์เชิงคุณภาพ</div>
+            <div style="font-size:12px;color:var(--t4);margin-top:2px" id="aiResultMeta"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button onclick="resetAIResult()" style="padding:6px 12px;border-radius:var(--r1);border:1px solid var(--border);background:var(--bg);color:var(--t2);font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;cursor:pointer">วิเคราะห์ใหม่</button>
+            <button onclick="window.print()" style="padding:6px 12px;border-radius:var(--r1);border:none;background:var(--navy);color:#fff;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;cursor:pointer">🖨️ พิมพ์ PDF</button>
+          </div>
+        </div>
+        <div class="ai-result-rendered-body" id="aiResultBody"></div>
+      </div>
+
+    </div>
+  </div>
+</div></div>
+</div><!-- /main -->
+<script>
+const STORAGE_KEY = "nithet_v2";
+const SECS = [
+  {id:"d1",n:"1",title:"ด้านหลักสูตรสถานศึกษา",items:[
+    {id:"1.1.1",label:"หลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน พุทธศักราช 2551"},
+    {id:"1.1.2",label:"หลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน พุทธศักราช 2551 ตามแนวทางทวิ/พหุภาษา"},
+    {id:"1.1.3",label:"หลักสูตรการศึกษาประถมศึกษาตอนต้น ชั้นประถมศึกษาปีที่ 1–3 พุทธศักราช 2568"},
+    {id:"1.1.4",label:"หลักสูตรการศึกษาประถมศึกษาตอนปลาย ชั้นประถมศึกษาปีที่ 4–6 พุทธศักราช 2568"},
+    {id:"1.1.5",label:"หลักสูตรสถานศึกษานำร่องพื้นที่นวัตกรรมการศึกษา ตามพระราชบัญญัติพื้นที่นวัตกรรมการศึกษา พุทธศักราช 2562"},
+    {id:"1.1.6",label:"หลักสูตรฐานสมรรถนะ ตาม (ร่าง) กรอบหลักสูตรการศึกษาขั้นพื้นฐาน พุทธศักราช ..... ระดับประถมศึกษา"},
+    {id:"1.2.1",label:"องค์ประกอบหลักสูตร: บทนำ"},
+    {id:"1.2.2",label:"องค์ประกอบหลักสูตร: โครงสร้างเวลาเรียน (รวมวิชาการป้องกันการทุจริต)"},
+    {id:"1.2.3",label:"องค์ประกอบหลักสูตร: คำอธิบายรายวิชา (บูรณาการหลักสูตรท้องถิ่น / เชื่อมโยงสมรรถนะผู้เรียน)"},
+    {id:"1.2.4",label:"องค์ประกอบหลักสูตร: กิจกรรมพัฒนาผู้เรียน"},
+    {id:"1.2.5",label:"องค์ประกอบหลักสูตร: เกณฑ์การจบการศึกษา"},
+    {id:"1.3.1",label:"หลักสูตรเด็กพอเพียง 'เก่งคิด ใช้เงินเป็น' บูรณาการ ป.1–3 (ระบุวิชา)"},
+    {id:"1.3.2",label:"หลักสูตรเด็กพอเพียง วิชาเพิ่มเติม ป.4–6"},
+    {id:"1.4.1",label:"หลักสูตรการศึกษาปฐมวัย พุทธศักราช 2560"},
+    {id:"1.4.2",label:"หลักสูตรการศึกษาปฐมวัย พุทธศักราช 2568 สำหรับเด็กอายุ 3–6 ปี"},
+    {id:"1.4.3",label:"บูรณาการหลักสูตรท้องถิ่น (ปฐมวัย)"},
+    {id:"1.5",label:"การจัดทำแผนการศึกษาเฉพาะบุคคล IEP โดยปรับหลักสูตรให้เหมาะสมกับผู้เรียนตามความต้องการจำเป็นพิเศษ ตามข้อ 1.1 และ 1.4"},
+  ]},
+  {id:"d2",n:"2",title:"ด้านกระบวนการจัดการเรียนรู้",items:[
+    {id:"2.1.1",label:"แผนการจัดการเรียนรู้ของครูผู้สอนรายบุคคล"},
+    {id:"2.1.2",label:"แผนการจัดการเรียนรู้ระดับปฐมวัย"},
+    {id:"2.1.3",label:"แผนการจัดการเรียนรู้ระดับการศึกษาขั้นพื้นฐาน"},
+    {id:"2.1.4",label:"การศึกษาพิเศษ: แผนการสอนเฉพาะบุคคล IIP"},
+    {id:"2.2",label:"จำนวนครูที่มีแผนการจัดการเรียนรู้ คิดเป็นร้อยละ",pct:true},
+  ]},
+  {id:"d3",n:"3",title:"ด้านการวัดและประเมินผล",items:[
+    {id:"3.1",label:"มีคู่มือการวัดผลประเมินครอบคลุมตามแนวปฏิบัติการวัดและประเมินผลการเรียนรู้ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน พ.ศ. 2551"},
+    {id:"3.2",label:"มีแนวทางการยกระดับผลสัมฤทธิ์ทางการเรียนตามบริบทของสถานศึกษา"},
+    {id:"3.3.1",label:"การจัดทำ ปพ.1 ถูกต้องตามแนวปฏิบัติ: จำนวนชั่วโมงรวมรายวิชาพื้นฐาน/เพิ่มเติม"},
+    {id:"3.3.2",label:"การจัดทำ ปพ.1 ถูกต้องตามแนวปฏิบัติ: กิจกรรมพัฒนาผู้เรียน"},
+    {id:"3.3.3",label:"การจัดทำ ปพ.1 ถูกต้องตามแนวปฏิบัติ: เกณฑ์การจบหลักสูตร"},
+  ]},
+  {id:"d4",n:"4",title:"ด้านสื่อ เทคโนโลยีและแหล่งเรียนรู้",items:[
+    {id:"4.1",label:"ผู้บริหาร/ครูได้รับการพัฒนาตนเองด้านเทคโนโลยีทางการศึกษา ผ่านบทเรียนออนไลน์ E-learning CME2, แพลตฟอร์มออนไลน์, อบรมสร้างสื่อผ่าน Zoom, OBEC Content Center หรือหน่วยงานอื่น ๆ คิดเป็นร้อยละ",pct:true},
+    {id:"4.2",label:"ได้นำความรู้ด้านเทคโนโลยีทางการศึกษาที่ผ่านการพัฒนาตนเองมาผลิตสื่อการจัดการเรียนรู้"},
+    {id:"4.3",label:"รายงานการพัฒนาตนเองด้านสื่อเทคโนโลยีผ่านระบบรายงานออนไลน์ (http://bit.ly/42nMVX5)"},
+    {id:"4.4",label:"ระบุแหล่งเรียนรู้ในสถานศึกษา / นอกสถานศึกษา / คลังสื่อ"},
+    {id:"4.5",label:"การจัดการศึกษาทางไกลผ่านดาวเทียม DLTV มีครูผู้รับผิดชอบ DLTV ตารางเรียน ปฏิทินการนิเทศภายใน มีระบบสัญญาณและอุปกรณ์เทคโนโลยีสัญญาณคมชัดและเสถียร"},
+  ]},
+  {id:"d5",n:"5",title:"ด้านการประกันคุณภาพภายในสถานศึกษา",items:[
+    {id:"5.1",label:"สถานศึกษามีการทบทวนผลการดำเนินการเพื่อพัฒนาสถานศึกษาให้มีคุณภาพตามมาตรฐานการศึกษาในปีที่ผ่านมา"},
+    {id:"5.2",label:"สถานศึกษามีการกำหนดมาตรฐานการศึกษาและค่าเป้าหมาย"},
+    {id:"5.3",label:"สถานศึกษารายงานผลการประเมินตนเอง (SAR/PQA) และนำส่งหน่วยงานต้นสังกัด"},
+  ]},
+  {id:"d6",n:"6",title:"ด้านการนิเทศภายในสถานศึกษา",items:[
+    {id:"6.1",label:"มีการสร้างการรับรู้ สร้างความเข้าใจและความไว้วางใจให้กับคณะครูในโรงเรียน เพื่อการเตรียมพร้อมในการนิเทศระดับชั้นเรียน"},
+    {id:"6.2",label:"มีกิจกรรมการเสริมสร้างทักษะการโค้ชและทักษะการใช้คำถามสะท้อนคิดให้กับทีมผู้นิเทศ เพื่อสร้างความเชื่อมั่นให้กับคณะครูในการนิเทศระดับชั้นเรียน"},
+    {id:"6.3",label:"มีโครงการ/กิจกรรม และปฏิทินการนิเทศที่ชัดเจนตลอดภาคเรียน"},
+  ]},
+  {id:"d7",n:"7",title:"ด้านนโยบาย จุดเน้น สพป.เชียงใหม่ เขต 2",items:[
+    {id:"7.1.1",label:"การขับเคลื่อนหลักปรัชญาของเศรษฐกิจพอเพียง (1) ด้านหลักสูตร: บูรณาการในสาระการเรียนรู้ / จัดทำรายวิชาเพิ่มเติม / กิจกรรมเสริมหลักสูตร / กิจกรรมพัฒนาผู้เรียน"},
+    {id:"7.1.2",label:"การขับเคลื่อนหลักปรัชญาของเศรษฐกิจพอเพียง (2) ด้านการจัดการเรียนรู้บูรณาการหลักปรัชญาของเศรษฐกิจพอเพียง"},
+    {id:"7.1.3",label:"การขับเคลื่อนหลักปรัชญาของเศรษฐกิจพอเพียง (3) ด้านสื่อและแหล่งเรียนรู้เกี่ยวกับหลักปรัชญาของเศรษฐกิจพอเพียง"},
+    {id:"7.1.4",label:"การนำพระบรมราโชบายด้านการศึกษาของในหลวงรัชกาลที่ 10 สู่การปฏิบัติ (1) ด้านหลักสูตร: บูรณาการในสาระการเรียนรู้ / จัดทำรายวิชาเพิ่มเติม / กิจกรรมเสริมหลักสูตร / กิจกรรมพัฒนาผู้เรียน"},
+    {id:"7.1.5",label:"การนำพระบรมราโชบายด้านการศึกษาของในหลวงรัชกาลที่ 10 สู่การปฏิบัติ (2) ด้านการจัดการเรียนรู้น้อมนำพระบรมราโชบาย"},
+    {id:"7.1.6",label:"การนำพระบรมราโชบายด้านการศึกษาของในหลวงรัชกาลที่ 10 สู่การปฏิบัติ (3) ด้านสื่อและแหล่งเรียนรู้"},
+    {id:"7.2",label:"การจัดการเรียนรู้และพัฒนานวัตกรรมการสอนประวัติศาสตร์ เพื่อส่งเสริมความรักชาติ ศาสน์ กษัตริย์ สู่ห้องเรียนวิถีใหม่ด้วยดิจิทัล"},
+    {id:"7.3",label:"การส่งเสริมต่อยอดแนวคิดการจัดการเรียนรู้เชิงรุก (Active Learning) ให้สอดคล้องกับบริบทของสถานศึกษา และพัฒนาศักยภาพผู้เรียนตามความถนัด ความสนใจ ให้เรียนรู้อย่างมีความสุข"},
+    {id:"7.4.1",label:"การส่งเสริมการอ่านและการใช้ห้องสมุด (1) มีกิจกรรมหรือโครงการส่งเสริมการอ่าน"},
+    {id:"7.4.2",label:"การส่งเสริมการอ่านและการใช้ห้องสมุด (2) การใช้ห้องสมุด Smart Library"},
+    {id:"7.5",label:"การพัฒนาความฉลาดรู้ตามแนวทางการประเมิน PISA"},
+    {id:"7.6.1",label:"การพัฒนาคุณภาพและบูรณาการขับเคลื่อนโรงเรียนจัดการศึกษาเรียนรวม เพื่อลดจำนวนนักเรียนที่มีความบกพร่องทางการเรียนรู้ (1) มีโครงการ/กิจกรรมพัฒนา"},
+    {id:"7.6.2",label:"การพัฒนาคุณภาพและบูรณาการขับเคลื่อนโรงเรียนจัดการศึกษาเรียนรวม (2) วิจัยชั้นเรียน"},
+    {id:"7.7.1",label:"การส่งเสริมพัฒนาศักยภาพผู้เรียนที่มีความสามารถพิเศษตามพหุปัญญา (1) สถานศึกษาจัดโครงการ/กิจกรรมเสริมหลักสูตร/กิจกรรมพัฒนาผู้เรียน/บูรณาการในสาระการเรียนรู้ เพื่อพัฒนาศักยภาพตามพหุปัญญารายบุคคลทั้ง 8 ด้าน"},
+    {id:"7.7.2",label:"การส่งเสริมพัฒนาศักยภาพผู้เรียนตามพหุปัญญา (2) ครูมีการจัดทำแผนการจัดการเรียนรู้ที่ส่งเสริมพหุปัญญา"},
+    {id:"7.8",label:"การเสริมสร้างทักษะอาชีพและการมีรายได้ระหว่างเรียน มีการพัฒนาอย่างต่อเนื่อง"},
+    {id:"7.9",label:"การส่งเสริมกิจกรรมรักษ์สิ่งแวดล้อม ได้แก่ โรงเรียนสิ่งแวดล้อมศึกษาเพื่อการพัฒนาที่ยั่งยืน, โรงเรียนพฤกษศาสตร์, โรงเรียนอีโคสคูล, โรงเรียนคาร์บอนต่ำ, โรงเรียนไร้ขวด, โรงเรียนส่งเสริมการอนุรักษ์พลังงาน"},
+    {id:"7.10.1",label:"การส่งเสริมการจัดการเรียนรู้บูรณาการสะเต็มศึกษา (1) โรงเรียนจัดการเรียนรู้บูรณาการสะเต็มศึกษา"},
+    {id:"7.10.2",label:"การส่งเสริมการจัดการเรียนรู้บูรณาการสะเต็มศึกษา (2) จัดทำแผนการเรียนรู้บูรณาการสะเต็มศึกษา"},
+    {id:"7.11.1",label:"การสร้างความเข้มแข็งระบบแนะแนว การชี้แนะ (Coaching) และส่งเสริมความสามารถของผู้เรียนอย่างรอบด้าน และมีการสื่อสารกับผู้ปกครอง (1) มีครูที่รับผิดชอบงานแนะแนว"},
+    {id:"7.11.2",label:"การสร้างความเข้มแข็งระบบแนะแนว (2) การพัฒนาผ่าน E-learning หลักสูตรการพัฒนาครูแนะแนวและการ Coaching กิจกรรมแนะแนว"},
+  ]},
+];
+const TOTAL = SECS.reduce(function(a,s){ return a + s.items.length; }, 0);
+
+let schools = [];
+let currentST = {};
+let currentInfo = {};
+let missingPanelOpen = false;
+
+function loadSchools(){
+  try { schools = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ schools = []; }
+}
+function saveSchoolsLocal(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(schools)); } catch(e){}
+}
+function exportData(){
+  if(schools.length === 0){ toast('ยังไม่มีข้อมูล', 'err'); return; }
+  const obj = { version:2, exportedAt: new Date().toISOString(), schools: schools };
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nithet_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('✓ ส่งออกข้อมูลเรียบร้อย', 'ok');
+}
+function importData(){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json,.txt';
+  input.onchange = function(e){
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        const obj = JSON.parse(ev.target.result);
+        const imported = Array.isArray(obj) ? obj : (obj.schools || []);
+        if(!Array.isArray(imported)) throw new Error('bad');
+        imported.forEach(function(rec){
+          const idx = schools.findIndex(function(s){ return s.id === rec.id || s.info.schoolName === rec.info.schoolName; });
+          if(idx >= 0) schools[idx] = rec; else schools.push(rec);
+        });
+        saveSchoolsLocal();
+        renderDashboard();
+        toast('✓ นำเข้า ' + imported.length + ' โรงเรียนเรียบร้อย', 'ok');
+      } catch(err){ toast('✗ ไฟล์ไม่ถูกต้อง', 'err'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function deleteSchool(id){
+  if(!confirm('ลบข้อมูลโรงเรียนนี้?')) return;
+  schools = schools.filter(function(s){ return s.id !== id; });
+  saveSchoolsLocal(); renderDashboard();
+  toast('ลบข้อมูลเรียบร้อย');
+}
+function countST(st){
+  let done=0, prog=0, nyet=0;
+  Object.values(st).forEach(function(v){
+    if(v.v==='done') done++; else if(v.v==='prog') prog++; else if(v.v==='nyet') nyet++;
+  });
+  return {done:done, prog:prog, nyet:nyet, total:done+prog+nyet};
+}
+function countRecord(rec){ return countST(rec.items); }
+function getMissingItems(rec){
+  const missing = [];
+  SECS.forEach(function(s){ s.items.forEach(function(i){
+    if(!rec.items[i.id] || !rec.items[i.id].v) missing.push({secTitle:s.title, id:i.id, label:i.label});
+  }); });
+  return missing;
+}
+function getAllMissing(){
+  const map = {};
+  schools.forEach(function(rec){
+    getMissingItems(rec).forEach(function(m){
+      if(!map[m.id]) map[m.id] = {secTitle:m.secTitle, id:m.id, label:m.label, count:0, schools:[]};
+      map[m.id].count++; map[m.id].schools.push(rec.info.schoolName);
+    });
+  });
+  return Object.values(map).sort(function(a,b){ return b.count-a.count; });
+}
+function buildForm(){
+  const c = document.getElementById('formSec'); c.innerHTML = '';
+  SECS.forEach(function(s, idx){
+    s.items.forEach(function(i){ currentST[i.id] = {v:'',n:'',p:''}; });
+    const w = document.createElement('div');
+    w.className = 'domain anim'; w.id = 'sec-' + s.id;
+    w.style.animationDelay = (idx * 0.04) + 's';
+    const thCols = s.items.map(mkRow).join('');
+    w.innerHTML = '<div class="dom-card">'
+      + '<div class="dom-hd" id="dh-'+s.id+'" onclick="togDom(\'' + s.id + '\')">'
+      + '<div class="d-num" id="dn-'+s.id+'">'+s.n+'</div>'
+      + '<div class="d-title">'+s.title+'</div>'
+      + '<div class="d-meta"><div class="d-minis" id="dm-'+s.id+'"></div>'
+      + '<div class="d-cnt" id="dc-'+s.id+'">0 / '+s.items.length+'</div>'
+      + '<svg class="d-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>'
+      + '</div></div>'
+      + '<div class="dom-thead" id="dt-'+s.id+'" style="display:none">'
+      + '<div class="d-th">ประเด็นการนิเทศ ติดตาม</div>'
+      + '<div class="d-th">✓ ดำเนินการแล้ว</div>'
+      + '<div class="d-th">◑ ระหว่างดำเนินการ</div>'
+      + '<div class="d-th">✗ ยังไม่ได้ดำเนินการ</div>'
+      + '<div class="d-th">ข้อเสนอแนะในการพัฒนา</div>'
+      + '</div>'
+      + '<div class="dom-body" id="db-'+s.id+'" style="display:none">'
+      + thCols
+      + '</div></div>';
+    c.appendChild(w);
+  });
+}
+function mkRow(it){
+  const eid = it.id.replace('.','_');
+  const pH = it.pct
+    ? '<div class="i-pct"><input type="number" min="0" max="100" placeholder="0" oninput="currentST[\''+it.id+'\'].p=this.value"/><span>ร้อยละ</span></div>'
+    : '';
+  return '<div class="irow" id="ir-'+it.id+'">'
+    + '<div class="ic"><div class="i-id">'+it.id+'</div><div class="i-lbl">'+it.label+'</div>'+pH+'</div>'
+    + '<div class="ic scol"><button class="st-btn" id="sb-'+it.id+'-done" onclick="pick(\'' + it.id + '\',\'done\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>ดำเนินการแล้ว</button></div>'
+    + '<div class="ic scol"><button class="st-btn" id="sb-'+it.id+'-prog" onclick="pick(\'' + it.id + '\',\'prog\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>ระหว่างดำเนินการ</button></div>'
+    + '<div class="ic scol"><button class="st-btn" id="sb-'+it.id+'-nyet" onclick="pick(\'' + it.id + '\',\'nyet\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>ยังไม่ได้ดำเนินการ</button></div>'
+    + '<div class="ic"><textarea class="i-note" placeholder="ข้อเสนอแนะในการพัฒนา..." oninput="currentST[\''+it.id+'\'].n=this.value"></textarea></div>'
+    + '</div>';
+}
+function togDom(id){
+  const bd=document.getElementById('db-'+id), th=document.getElementById('dt-'+id), hd=document.getElementById('dh-'+id);
+  const open = bd.style.display !== 'none';
+  bd.style.display = open?'none':'flex'; th.style.display = open?'none':'grid'; hd.classList.toggle('open',!open);
+}
+function pick(id, val){
+  const prev = currentST[id].v;
+  ['done','prog','nyet'].forEach(function(v){ const b=document.getElementById('sb-'+id+'-'+v); if(b) b.className='st-btn'; });
+  const row = document.getElementById('ir-'+id);
+  if(prev === val){ currentST[id].v=''; if(row) row.className='irow'; }
+  else { const b=document.getElementById('sb-'+id+'-'+val); if(b) b.className='st-btn a-'+val; currentST[id].v=val; if(row) row.className='irow s-'+val; }
+  updateFormProgress();
+}
+function updateFormProgress(){
+  const cnt = countST(currentST);
+  SECS.forEach(function(s){
+    let sf=0,sd=0,sp=0,sn=0;
+    s.items.forEach(function(i){ const v=currentST[i.id].v; if(v)sf++; if(v==='done')sd++; if(v==='prog')sp++; if(v==='nyet')sn++; });
+    const dc=document.getElementById('dc-'+s.id); if(dc){ dc.textContent=sf+'/'+s.items.length; dc.className=sf===s.items.length?'d-cnt all':'d-cnt'; }
+    const nb=document.getElementById('nb-'+s.id); if(nb){ nb.textContent=sf; nb.className=sf===s.items.length?'ni-bdg complete':'ni-bdg'; }
+    const dm=document.getElementById('dm-'+s.id);
+    if(dm){ let h=''; if(sd>0) h+='<div class="d-mini"><div class="d-mdot done"></div>'+sd+'</div>'; if(sp>0) h+='<div class="d-mini"><div class="d-mdot prog"></div>'+sp+'</div>'; if(sn>0) h+='<div class="d-mini"><div class="d-mdot nyet"></div>'+sn+'</div>'; dm.innerHTML=h; }
+  });
+  const pct = TOTAL>0 ? Math.round(cnt.total/TOTAL*100) : 0;
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progPct').textContent = pct+'%';
+}
+function startForm(){
+  const name = document.getElementById('schoolName').value.trim();
+  if(!name){ toast('⚠ กรุณาระบุชื่อโรงเรียนก่อน','err'); document.getElementById('schoolName').focus(); return; }
+  currentInfo = {
+    schoolName: name,
+    network: document.getElementById('network').value,
+    principal: document.getElementById('principal').value,
+    supervisor: document.getElementById('supervisor').value,
+    visitDate: document.getElementById('visitDate').value
+  };
+  SECS.forEach(function(s){ s.items.forEach(function(i){ currentST[i.id]={v:'',n:'',p:''}; }); });
+  buildForm(); goPage('form');
+  document.getElementById('formBannerName').textContent = currentInfo.schoolName;
+  document.getElementById('formBannerMeta').textContent = (currentInfo.supervisor||'—') + (currentInfo.visitDate ? ' · '+currentInfo.visitDate : '');
+  document.getElementById('signR').textContent = currentInfo.principal ? '('+currentInfo.principal+')' : '(........................................)';
+  document.getElementById('signS').textContent = currentInfo.supervisor ? '('+currentInfo.supervisor+')' : '(........................................)';
+}
+function saveSchool(){
+  if(!currentInfo.schoolName){ toast('⚠ ยังไม่ได้กรอกข้อมูลโรงเรียน','err'); goPage('info'); return; }
+  const itemsCopy = {};
+  Object.keys(currentST).forEach(function(k){ itemsCopy[k] = Object.assign({}, currentST[k]); });
+  const existIdx = schools.findIndex(function(s){ return s.info.schoolName === currentInfo.schoolName; });
+  const prevQual = existIdx>=0 ? schools[existIdx].qualAnalysis : null;
+  const rec = { id: existIdx>=0 ? schools[existIdx].id : Date.now().toString(), info: Object.assign({},currentInfo), items: itemsCopy, savedAt: new Date().toISOString() };
+  if(prevQual) rec.qualAnalysis = prevQual; // preserve existing analysis
+  if(existIdx>=0){ schools[existIdx]=rec; } else { schools.push(rec); }
+  saveSchoolsLocal();
+  toast('✓ บันทึก "'+currentInfo.schoolName+'" เรียบร้อย — กด ↓ ส่งออกเพื่อเก็บข้อมูลถาวร', 'ok');
+  renderDashboard();
+  fetch('https://script.google.com/macros/s/AKfycbzVxApzePFneC7vaBFIoYXwJCLa6R3lAsMBWnyxQImgD2NExmRuyyB-zcnBinrpCYSibw/exec',{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildSheetRow(rec))}).catch(function(){});
+}
+function buildSheetRow(rec){
+  const row = [rec.savedAt, rec.info.visitDate, rec.info.schoolName, rec.info.network, rec.info.principal, rec.info.supervisor];
+  SECS.forEach(function(s){ s.items.forEach(function(i){ row.push(i.label, (rec.items[i.id]&&rec.items[i.id].v)||''); if(i.pct) row.push((rec.items[i.id]&&rec.items[i.id].p)||''); row.push((rec.items[i.id]&&rec.items[i.id].n)||''); }); });
+  return row;
+}
+function editSchool(id){
+  const rec = schools.find(function(s){ return s.id===id; }); if(!rec) return;
+  ['schoolName','network','principal','supervisor','visitDate'].forEach(function(k){ document.getElementById(k).value = rec.info[k]||''; });
+  currentInfo = Object.assign({}, rec.info);
+  SECS.forEach(function(s){ s.items.forEach(function(i){ currentST[i.id] = Object.assign({v:'',n:'',p:''}, rec.items[i.id]||{}); }); });
+  buildForm();
+  SECS.forEach(function(s){ s.items.forEach(function(i){
+    const v=currentST[i.id].v; if(!v) return;
+    const b=document.getElementById('sb-'+i.id+'-'+v); if(b) b.className='st-btn a-'+v;
+    const row=document.getElementById('ir-'+i.id); if(row) row.className='irow s-'+v;
+  }); });
+  document.getElementById('formBannerName').textContent = currentInfo.schoolName;
+  document.getElementById('formBannerMeta').textContent = (currentInfo.supervisor||'—')+(currentInfo.visitDate?' · '+currentInfo.visitDate:'');
+  document.getElementById('signR').textContent = currentInfo.principal?'('+currentInfo.principal+')':'(........................................)';
+  document.getElementById('signS').textContent = currentInfo.supervisor?'('+currentInfo.supervisor+')':'(........................................)';
+  updateFormProgress(); goPage('form');
+}
+function renderDashboard(){
+  const n = schools.length;
+  let tD=0, tP=0, tN=0, tF=0, tPoss=0;
+  schools.forEach(function(rec){ const c=countRecord(rec); tD+=c.done; tP+=c.prog; tN+=c.nyet; tF+=c.total; tPoss+=TOTAL; });
+  set('kpiSchools',n); set('kpiDone',tD); set('kpiProg',tP); set('kpiNyet',tN);
+  set('kpiDoneS', tPoss>0 ? Math.round(tD/tPoss*100)+'% จาก '+tPoss+' ประเด็น' : '—');
+  set('kpiProgS', tPoss>0 ? Math.round(tP/tPoss*100)+'% จาก '+tPoss+' ประเด็น' : '—');
+  set('kpiNyetS', tPoss>0 ? Math.round(tN/tPoss*100)+'% จาก '+tPoss+' ประเด็น' : '—');
+  setW('kpiDoneBar', tPoss>0?Math.min(100,Math.round(tD/tPoss*100)):0);
+  setW('kpiProgBar', tPoss>0?Math.min(100,Math.round(tP/tPoss*100)):0);
+  setW('kpiNyetBar', tPoss>0?Math.min(100,Math.round(tN/tPoss*100)):0);
+  const pct = tPoss>0 ? Math.round(tF/tPoss*100) : 0; set('dPct', pct+'%');
+  const C = 2*Math.PI*46; let off=0;
+  function arc(elId,count){
+    const el=document.getElementById('dn-'+elId); if(!el) return;
+    const len=tPoss>0?(count/tPoss)*C:0;
+    el.setAttribute('stroke-dasharray',len.toFixed(1)+' '+(C-len).toFixed(1));
+    el.setAttribute('stroke-dashoffset',(-off).toFixed(1)); off+=len;
+  }
+  arc('done',tD); arc('prog',tP); arc('nyet',tN);
+  const notFilled = tPoss-tF;
+  set('lD',tD); set('lDp',tPoss>0?Math.round(tD/tPoss*100)+'%':'0%');
+  set('lP',tP); set('lPp',tPoss>0?Math.round(tP/tPoss*100)+'%':'0%');
+  set('lN',tN); set('lNp',tPoss>0?Math.round(tN/tPoss*100)+'%':'0%');
+  set('lM',notFilled); set('lMp',tPoss>0?Math.round(notFilled/tPoss*100)+'%':'0%');
+
+  // Missing panel
+  const mRow=document.getElementById('missingLegRow');
+  const mName=document.getElementById('missingLegName');
+  if(mRow && mName){
+    if(notFilled>0){
+      mRow.classList.add('has-missing');
+      mName.textContent='⚠ ยังไม่ได้ระบุ (คลิกดูรายการ)';
+    } else {
+      mRow.classList.remove('has-missing');
+      mName.textContent='ยังไม่ได้ระบุ';
+      const mp=document.getElementById('missingPanel');
+      if(mp) mp.classList.remove('open');
+      missingPanelOpen=false;
+    }
+  }
+  const allM = getAllMissing();
+  const panelBody=document.getElementById('missingPanelBody');
+  const panelHd=document.getElementById('missingPanelHd');
+  if(panelHd) panelHd.textContent = 'ประเด็นที่ยังไม่ได้ระบุ ('+allM.length+' ประเด็น)';
+  if(panelBody){
+    if(allM.length>0){
+      const bySection={};
+      allM.forEach(function(m){ if(!bySection[m.secTitle]) bySection[m.secTitle]=[]; bySection[m.secTitle].push(m); });
+      panelBody.innerHTML = Object.entries(bySection).map(function(entry){
+        const sec=entry[0], items=entry[1];
+        return '<div style="padding:6px 12px 2px;font-size:11px;font-weight:700;color:var(--warn)">'+sec+'</div>'
+          + items.map(function(m){
+            return '<div class="missing-item"><div class="missing-id">'+m.id+'</div><div>'+m.label+(m.count>1?' <span style="font-size:10.5px;color:var(--t4)">('+m.count+' โรงเรียน)</span>':'')+'</div></div>';
+          }).join('');
+      }).join('');
+    } else {
+      panelBody.innerHTML = '<div style="padding:12px;font-size:12.5px;color:var(--done)">✓ ทุกประเด็นได้รับการระบุครบแล้ว</div>';
+    }
+  }
+
+  // School table
+  const tb = document.getElementById('schoolTable');
+  if(n===0){
+    tb.innerHTML='<div class="sch-empty">ยังไม่มีข้อมูลโรงเรียน<br/>กด "+ เพิ่มโรงเรียน" เพื่อเริ่มต้น</div>';
+  } else {
+    tb.innerHTML = schools.map(function(rec){
+      const c=countRecord(rec), missing=getMissingItems(rec).length;
+      const missingHtml = missing>0
+        ? '<span class="chip warn">'+missing+'</span>'
+        : '<span class="chip done">✓</span>';
+      // ใช้ data attribute แทน inline onclick เพื่อหลีกเลี่ยงปัญหา escaping
+      return '<div class="sch-row">'
+        + '<div>'
+          + '<div class="sch-name">'+rec.info.schoolName+'</div>'
+          + '<div class="sch-date">'+(rec.info.visitDate||'')+(rec.info.supervisor?' · '+rec.info.supervisor:'')+'</div>'
+        + '</div>'
+        + '<div class="sch-stat"><span class="chip done">'+c.done+'</span></div>'
+        + '<div class="sch-stat"><span class="chip prog">'+c.prog+'</span></div>'
+        + '<div class="sch-stat"><span class="chip nyet">'+c.nyet+'</span></div>'
+        + '<div class="sch-stat">'+missingHtml+'</div>'
+        + '<div style="display:flex;gap:5px;flex-wrap:wrap">'
+          + '<button class="btn-xs sch-action" data-action="view" data-id="'+rec.id+'">ดู</button>'
+          + (rec.qualAnalysis?'<button class="btn-xs sch-action" data-action="qual" data-id="'+rec.id+'" style="color:var(--prog);border-color:var(--prog-b)">📊 ผลวิเคราะห์</button>':'')
+          + '<button class="btn-xs sch-action" data-action="edit" data-id="'+rec.id+'">แก้ไข</button>'
+          + '<button class="btn-xs sch-action" data-action="delete" data-id="'+rec.id+'" style="color:var(--nyet);border-color:var(--nyet-b)">ลบ</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+    // ผูก event listeners หลัง render — หลีกเลี่ยงปัญหา escaping ทั้งหมด
+    tb.querySelectorAll('.sch-action').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const id = btn.getAttribute('data-id');
+        const action = btn.getAttribute('data-action');
+        if(action==='view') viewSchool(id);
+        else if(action==='edit') editSchool(id);
+        else if(action==='delete') deleteSchool(id);
+        else if(action==='qual') viewQualAnalysis(id);
+      });
+    });
+  }
+  const cb=document.getElementById('ctaBox');
+  if(cb) cb.style.display = n>0?'none':'block';
+  renderQualAnalysisList();
+}
+
+function toggleMissingPanel(){
+  missingPanelOpen = !missingPanelOpen;
+  document.getElementById('missingPanel').classList.toggle('open', missingPanelOpen);
+  document.getElementById('missingArrow').textContent = missingPanelOpen ? '▲' : '▼';
+}
+function viewSchool(id){
+  const rec = schools.find(function(s){ return s.id===id; }); if(!rec) return;
+  document.getElementById('modalTitle').textContent = rec.info.schoolName;
+  // เพิ่มปุ่มดูผลวิเคราะห์ถ้ามี
+  const modalHdEl = document.getElementById('modalBg').querySelector('.modal-hd');
+  const existingQualBtn = document.getElementById('modalQualBtn');
+  if(existingQualBtn) existingQualBtn.remove();
+  if(rec.qualAnalysis){
+    const qualBtn = document.createElement('button');
+    qualBtn.id = 'modalQualBtn';
+    qualBtn.textContent = '📊 ดูผลวิเคราะห์เชิงคุณภาพ';
+    qualBtn.style.cssText = 'padding:6px 14px;border-radius:var(--r1);border:1px solid var(--prog-b);background:var(--prog-bg);color:var(--prog);font-family:"IBM Plex Sans Thai",sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;margin-right:8px';
+    qualBtn.addEventListener('click', function(){ closeModalDirect(); viewQualAnalysis(rec.id); });
+    if(modalHdEl) modalHdEl.insertBefore(qualBtn, modalHdEl.querySelector('.modal-close'));
+  }
+  const missing = getMissingItems(rec);
+  const labels = {done:'ดำเนินการแล้ว', prog:'ระหว่างดำเนินการ', nyet:'ยังไม่ได้ดำเนินการ'};
+  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;padding:14px;background:var(--bg);border-radius:var(--r2)">'
+    + '<div><div style="font-size:11px;color:var(--t4);margin-bottom:3px">ผู้บริหาร</div><div style="font-weight:600;color:var(--navy)">'+(rec.info.principal||'—')+'</div></div>'
+    + '<div><div style="font-size:11px;color:var(--t4);margin-bottom:3px">ผู้นิเทศ</div><div style="font-weight:600;color:var(--navy)">'+(rec.info.supervisor||'—')+'</div></div>'
+    + '<div><div style="font-size:11px;color:var(--t4);margin-bottom:3px">วันที่</div><div style="font-weight:600;color:var(--navy)">'+(rec.info.visitDate||'—')+'</div></div>'
+    + '</div>';
+  if(missing.length>0){
+    html += '<div style="background:var(--warn-bg);border:1px solid var(--warn-b);border-radius:var(--r2);padding:12px 16px;margin-bottom:16px">'
+      + '<div style="font-size:12.5px;font-weight:700;color:var(--warn);margin-bottom:8px">⚠ ยังไม่ได้ระบุ '+missing.length+' ประเด็น</div>'
+      + missing.map(function(m){ return '<div style="font-size:12px;color:var(--t2);padding:3px 0;border-bottom:1px solid rgba(146,64,14,.1);display:flex;gap:6px"><span style="font-size:10px;font-weight:700;color:var(--warn);flex-shrink:0">'+m.id+'</span>'+m.label+'</div>'; }).join('')
+      + '</div>';
+  }
+  SECS.forEach(function(s){
+    const filled = s.items.filter(function(i){ return rec.items[i.id]&&rec.items[i.id].v; });
+    if(filled.length===0) return;
+    html += '<div class="modal-sec"><div class="modal-sec-title">'+s.title+'</div>';
+    s.items.forEach(function(i){
+      const st=rec.items[i.id]; if(!st||!st.v) return;
+      html += '<div class="modal-item"><div class="modal-id">'+i.id+'</div><div><div class="modal-lbl">'+i.label+'</div>'
+        + '<div style="margin-top:4px"><span class="chip '+st.v+'">'+labels[st.v]+'</span>'+(st.p?' <span style="font-size:11px;color:var(--t3)">'+st.p+'%</span>':'')+'</div>'
+        + (st.n?'<div class="modal-note">&ldquo;'+st.n+'&rdquo;</div>':'')+'</div></div>';
+    });
+    html += '</div>';
+  });
+  // เพิ่ม section ผลวิเคราะห์เชิงคุณภาพ ถ้ามี
+  if(rec.qualAnalysis && rec.qualAnalysis.text){
+    const savedDt = new Date(rec.qualAnalysis.savedAt).toLocaleString('th-TH');
+    html += '<div style="margin-top:16px;padding:16px;background:var(--prog-bg);border:1px solid var(--prog-b);border-radius:var(--r2)">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      + '<div style="font-size:13px;font-weight:700;color:var(--prog)">📊 ผลวิเคราะห์เชิงคุณภาพ</div>'
+      + '<div style="font-size:11px;color:var(--t4)">บันทึกเมื่อ '+savedDt+'</div>'
+      + '</div>'
+      + '<button class="modal-qual-btn" data-school-id="'+rec.id+'" style="width:100%;padding:8px;border-radius:var(--r1);border:none;background:var(--prog);color:#fff;font-family:IBM Plex Sans Thai,sans-serif;font-size:13px;font-weight:600;cursor:pointer">ดูผลวิเคราะห์เชิงคุณภาพแบบเต็ม</button>'
+      + '</div>';
+  }
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(e){ if(e.target===document.getElementById('modalBg')) closeModalDirect(); }
+function closeModalDirect(){ document.getElementById('modalBg').classList.remove('open'); }
+// delegate qual button click inside modal
+document.getElementById('modalBg').addEventListener('click', function(e){
+  const btn = e.target.closest('.modal-qual-btn');
+  if(btn){ closeModalDirect(); viewQualAnalysis(btn.getAttribute('data-school-id')); }
+});
+
+
+function buildPrompt(){
+  const selected = schools.filter(function(rec){ const chk=document.getElementById('ai-chk-'+rec.id); return chk&&chk.checked; });
+  if(selected.length===0){ toast('⚠ เลือกอย่างน้อย 1 โรงเรียน','err'); return; }
+  const labels = {done:'ดำเนินการแล้ว', prog:'ระหว่างดำเนินการ', nyet:'ยังไม่ได้ดำเนินการ'};
+  const lines = [];
+  lines.push('คุณคือผู้เชี่ยวชาญด้านการนิเทศการศึกษา ฉันจะให้ข้อมูลผลการนิเทศ ติดตาม สถานศึกษา สพป.เชียงใหม่ เขต 2 ภาคเรียนที่ 1/2569 จำนวน '+selected.length+' โรงเรียน ขอให้วิเคราะห์และสรุปผล:');
+  lines.push('');
+  lines.push('1. ภาพรวมผลการนิเทศ (สถิติ %)');
+  lines.push('2. ด้าน/ประเด็นที่ต้องเร่งพัฒนา (จัดลำดับความเร่งด่วน)');
+  lines.push('3. จุดแข็งในภาพรวม');
+  lines.push('4. ข้อเสนอแนะแบ่งตามระยะสั้น/กลาง/ยาว');
+  lines.push('5. สรุปรายงาน 1 หน้าสำหรับผู้บริหาร');
+  lines.push('');
+  lines.push('=== ข้อมูลผลการนิเทศ ===');
+  lines.push('');
+  selected.forEach(function(rec){
+    const c=countRecord(rec), missing=getMissingItems(rec);
+    lines.push('--- โรงเรียน: '+rec.info.schoolName+' ---');
+    lines.push('ผู้บริหาร: '+(rec.info.principal||'-')+' | ผู้นิเทศ: '+(rec.info.supervisor||'-')+' | วันที่: '+(rec.info.visitDate||'-'));
+    lines.push('สรุป: ดำเนินการแล้ว '+c.done+' | ระหว่าง '+c.prog+' | ยังไม่ได้ '+c.nyet+' | ไม่ระบุ '+missing.length+' / ทั้งหมด '+TOTAL);
+    lines.push('');
+    SECS.forEach(function(s){
+      const hasData = s.items.some(function(i){ return rec.items[i.id]&&rec.items[i.id].v; });
+      if(!hasData) return;
+      lines.push('['+s.title+']');
+      s.items.forEach(function(i){
+        const st=rec.items[i.id];
+        if(!st||!st.v){ lines.push('  '+i.id+': (ไม่ได้ระบุ) '+i.label); return; }
+        let line = '  '+i.id+': ['+labels[st.v]+'] '+i.label;
+        if(st.p) line += ' ('+st.p+'%)';
+        if(st.n) line += '\n    → ข้อเสนอแนะ: "'+st.n+'"';
+        lines.push(line);
+      });
+      lines.push('');
+    });
+    if(missing.length>0) lines.push('ไม่ได้ระบุ: '+missing.map(function(m){ return m.id; }).join(', '));
+    lines.push('');
+  });
+  lines.push('=== จบข้อมูล ===');
+  lines.push('โปรดวิเคราะห์และสรุปผลตามที่ขอ โดยใช้ภาษาไทยที่เป็นทางการ กระชับ และตรงประเด็น');
+  document.getElementById('promptBox').textContent = lines.join('\n');
+  document.getElementById('promptCard').style.display = 'block';
+  document.getElementById('promptCard').scrollIntoView({behavior:'smooth', block:'start'});
+  toast('✓ สร้าง Prompt เรียบร้อย', 'ok');
+  // Show the AI result uploader after prompt is built
+  showAIUploader();
+}
+function copyPrompt(){
+  const txt = document.getElementById('promptBox').textContent;
+  if(!txt) return;
+  navigator.clipboard.writeText(txt)
+    .then(function(){ toast('✓ คัดลอก Prompt แล้ว','ok'); })
+    .catch(function(){ toast('ไม่สามารถคัดลอกได้ กรุณาเลือกข้อความเอง'); });
+}
+function goPage(name, sc){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('page-'+name).classList.add('active');
+  const tabMap = {dash:'tabDash', form:'tabForm', ai:'tabAi'};
+  ['tabDash','tabForm','tabAi'].forEach(function(id){ const b=document.getElementById(id); if(b) b.classList.toggle('active', id===tabMap[name]); });
+  document.querySelectorAll('.ni').forEach(function(b){
+    b.classList.toggle('active', b.dataset.pg===name && (!b.dataset.sec||!sc||b.dataset.sec===sc));
+  });
+  const lbl=document.getElementById('nb-section-label'); if(lbl) lbl.style.display = name==='form'?'':'none';
+  if(sc){ setTimeout(function(){ const el=document.getElementById(sc); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }, 100); }
+  else { window.scrollTo(0,0); }
+  if(window.innerWidth<820) closeSb();
+  if(name==='dash') renderDashboard();
+  if(name==='ai') renderQualAnalysisList();
+}
+function openSb(){ document.getElementById('sb').classList.add('open'); document.getElementById('sbOv').classList.add('open'); }
+function closeSb(){ document.getElementById('sb').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); }
+document.getElementById('menuBtn').addEventListener('click', openSb);
+document.getElementById('sbClose').addEventListener('click', closeSb);
+document.getElementById('sbOv').addEventListener('click', closeSb);
+document.querySelectorAll('.ni').forEach(function(b){
+  b.addEventListener('click', function(){ const pg=b.dataset.pg, sc=b.dataset.sec; if(pg) goPage(pg, sc); });
+});
+let _tt;
+function toast(msg, type){
+  clearTimeout(_tt);
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show '+(type||'');
+  _tt = setTimeout(function(){ el.className = 'toast'; }, 4500);
+}
+function set(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function setW(id,v){ const el=document.getElementById(id); if(el) el.style.width=v+'%'; }
+// INIT
+loadSchools();
+buildForm();
+document.getElementById('visitDate').valueAsDate = new Date();
+renderDashboard();
+
+// ════════════════════════════════════════════════
+//  AI ANALYSIS — paste-based workflow
+// ════════════════════════════════════════════════
+
+// สร้าง prompt จาก selected schools แล้วคัดลอกทันที
+function buildAndCopyPrompt(){
+  if(schools.length === 0){ toast('ยังไม่มีข้อมูลโรงเรียน', 'err'); return; }
+  const radioEl = document.querySelector('input[name="ai-school-radio"]:checked');
+  if(!radioEl){ toast('กรุณาเลือกโรงเรียน', 'err'); return; }
+  const selectedRec = schools.find(function(s){ return s.id === radioEl.value; });
+  if(!selectedRec){ toast('ไม่พบข้อมูลโรงเรียน', 'err'); return; }
+  const selected = [selectedRec];
+  const txt = buildPromptText(selected);
+  navigator.clipboard.writeText(txt)
+    .then(function(){ toast('✓ คัดลอก Prompt แล้ว ' + selected.length + ' โรงเรียน — วางใน Claude.ai หรือ ChatGPT ได้เลย', 'ok'); })
+    .catch(function(){
+      // Fallback: show in textarea
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('✓ คัดลอก Prompt แล้ว — วางใน Claude.ai หรือ ChatGPT ได้เลย', 'ok');
+    });
+}
+
+// สร้างข้อความ prompt สำหรับ AI
+
+
+function buildPrompt(){
+  const selected = schools.filter(function(rec){ const chk=document.getElementById('ai-chk-'+rec.id); return chk&&chk.checked; });
+  if(selected.length===0){ toast('⚠ เลือกอย่างน้อย 1 โรงเรียน','err'); return; }
+  const labels = {done:'ดำเนินการแล้ว', prog:'ระหว่างดำเนินการ', nyet:'ยังไม่ได้ดำเนินการ'};
+  const lines = [];
+  lines.push('คุณคือผู้เชี่ยวชาญด้านการนิเทศการศึกษา ฉันจะให้ข้อมูลผลการนิเทศ ติดตาม สถานศึกษา สพป.เชียงใหม่ เขต 2 ภาคเรียนที่ 1/2569 จำนวน '+selected.length+' โรงเรียน ขอให้วิเคราะห์และสรุปผล:');
+  lines.push('');
+  lines.push('1. ภาพรวมผลการนิเทศ (สถิติ %)');
+  lines.push('2. ด้าน/ประเด็นที่ต้องเร่งพัฒนา (จัดลำดับความเร่งด่วน)');
+  lines.push('3. จุดแข็งในภาพรวม');
+  lines.push('4. ข้อเสนอแนะแบ่งตามระยะสั้น/กลาง/ยาว');
+  lines.push('5. สรุปรายงาน 1 หน้าสำหรับผู้บริหาร');
+  lines.push('');
+  lines.push('=== ข้อมูลผลการนิเทศ ===');
+  lines.push('');
+  selected.forEach(function(rec){
+    const c=countRecord(rec), missing=getMissingItems(rec);
+    lines.push('--- โรงเรียน: '+rec.info.schoolName+' ---');
+    lines.push('ผู้บริหาร: '+(rec.info.principal||'-')+' | ผู้นิเทศ: '+(rec.info.supervisor||'-')+' | วันที่: '+(rec.info.visitDate||'-'));
+    lines.push('สรุป: ดำเนินการแล้ว '+c.done+' | ระหว่าง '+c.prog+' | ยังไม่ได้ '+c.nyet+' | ไม่ระบุ '+missing.length+' / ทั้งหมด '+TOTAL);
+    lines.push('');
+    SECS.forEach(function(s){
+      const hasData = s.items.some(function(i){ return rec.items[i.id]&&rec.items[i.id].v; });
+      if(!hasData) return;
+      lines.push('['+s.title+']');
+      s.items.forEach(function(i){
+        const st=rec.items[i.id];
+        if(!st||!st.v){ lines.push('  '+i.id+': (ไม่ได้ระบุ) '+i.label); return; }
+        let line = '  '+i.id+': ['+labels[st.v]+'] '+i.label;
+        if(st.p) line += ' ('+st.p+'%)';
+        if(st.n) line += '\n    → ข้อเสนอแนะ: "'+st.n+'"';
+        lines.push(line);
+      });
+      lines.push('');
+    });
+    if(missing.length>0) lines.push('ไม่ได้ระบุ: '+missing.map(function(m){ return m.id; }).join(', '));
+    lines.push('');
+  });
+  lines.push('=== จบข้อมูล ===');
+  lines.push('โปรดวิเคราะห์และสรุปผลตามที่ขอ โดยใช้ภาษาไทยที่เป็นทางการ กระชับ และตรงประเด็น');
+  document.getElementById('promptBox').textContent = lines.join('\n');
+  document.getElementById('promptCard').style.display = 'block';
+  document.getElementById('promptCard').scrollIntoView({behavior:'smooth', block:'start'});
+  toast('✓ สร้าง Prompt เรียบร้อย', 'ok');
+  // Show the AI result uploader after prompt is built
+  showAIUploader();
+}
+function copyPrompt(){
+  const txt = document.getElementById('promptBox').textContent;
+  if(!txt) return;
+  navigator.clipboard.writeText(txt)
+    .then(function(){ toast('✓ คัดลอก Prompt แล้ว','ok'); })
+    .catch(function(){ toast('ไม่สามารถคัดลอกได้ กรุณาเลือกข้อความเอง'); });
+}
+function goPage(name, sc){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('page-'+name).classList.add('active');
+  const tabMap = {dash:'tabDash', form:'tabForm', ai:'tabAi'};
+  ['tabDash','tabForm','tabAi'].forEach(function(id){ const b=document.getElementById(id); if(b) b.classList.toggle('active', id===tabMap[name]); });
+  document.querySelectorAll('.ni').forEach(function(b){
+    b.classList.toggle('active', b.dataset.pg===name && (!b.dataset.sec||!sc||b.dataset.sec===sc));
+  });
+  const lbl=document.getElementById('nb-section-label'); if(lbl) lbl.style.display = name==='form'?'':'none';
+  if(sc){ setTimeout(function(){ const el=document.getElementById(sc); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }, 100); }
+  else { window.scrollTo(0,0); }
+  if(window.innerWidth<820) closeSb();
+  if(name==='dash') renderDashboard();
+  if(name==='ai') renderAISchoolList();
+}
+function openSb(){ document.getElementById('sb').classList.add('open'); document.getElementById('sbOv').classList.add('open'); }
+function closeSb(){ document.getElementById('sb').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); }
+document.getElementById('menuBtn').addEventListener('click', openSb);
+document.getElementById('sbClose').addEventListener('click', closeSb);
+document.getElementById('sbOv').addEventListener('click', closeSb);
+document.querySelectorAll('.ni').forEach(function(b){
+  b.addEventListener('click', function(){ const pg=b.dataset.pg, sc=b.dataset.sec; if(pg) goPage(pg, sc); });
+});
+
+
+function set(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function setW(id,v){ const el=document.getElementById(id); if(el) el.style.width=v+'%'; }
+// INIT
+loadSchools();
+buildForm();
+document.getElementById('visitDate').valueAsDate = new Date();
+renderDashboard();
+
+// ════════════════════════════════════════════════
+//  AI ANALYSIS — paste-based workflow
+// ════════════════════════════════════════════════
+
+// สร้าง prompt จาก selected schools แล้วคัดลอกทันที
+function buildAndCopyPrompt(){
+  if(schools.length === 0){ toast('ยังไม่มีข้อมูลโรงเรียน', 'err'); return; }
+  const radioEl = document.querySelector('input[name="ai-school-radio"]:checked');
+  if(!radioEl){ toast('เลือกโรงเรียนก่อน', 'err'); return; }
+  const selectedRec = schools.find(function(s){ return s.id === radioEl.value; });
+  if(!selectedRec){ toast('ไม่พบข้อมูลโรงเรียน', 'err'); return; }
+  const selected = [selectedRec];
+  const txt = buildPromptText(selected);
+  navigator.clipboard.writeText(txt)
+    .then(function(){ toast('✓ คัดลอก Prompt แล้ว ' + selected.length + ' โรงเรียน — วางใน Claude.ai หรือ ChatGPT ได้เลย', 'ok'); })
+    .catch(function(){
+      // Fallback: show in textarea
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('✓ คัดลอก Prompt แล้ว — วางใน Claude.ai หรือ ChatGPT ได้เลย', 'ok');
+    });
+}
+
+// สร้างข้อความ prompt สำหรับ AI
+
+
+// แสดงผลวิเคราะห์จากข้อความที่วางมา
+function renderPastedResult(){
+  const raw = (document.getElementById('aiPasteBox').value || '').trim();
+  if(!raw){ toast('กรุณาวางข้อความผลวิเคราะห์ก่อนกดแสดงผล', 'err'); return; }
+  const radioElP = document.querySelector('input[name="ai-school-radio"]:checked');
+  const selectedIds = radioElP ? [radioElP.value] : [];
+  if(selectedIds.length > 0){
+    saveQualAnalysisToSchool(raw, selectedIds);
+    renderQualAnalysisList();
+  }
+  document.getElementById('aiResultTitle').textContent = 'ผลวิเคราะห์เชิงคุณภาพ';
+  document.getElementById('aiResultMeta').textContent = 'บันทึกเมื่อ ' + new Date().toLocaleString('th-TH') + (selectedIds.length>0 ? ' · บันทึกแล้ว '+selectedIds.length+' โรงเรียน' : '');
+  document.getElementById('aiResultBody').innerHTML = markdownToHtml(raw);
+  document.getElementById('aiEmptyState').style.display = 'none';
+  document.getElementById('aiResultDisplay').style.display = 'block';
+  document.getElementById('aiResultDisplay').scrollIntoView({behavior:'smooth', block:'start'});
+  toast('✓ บันทึกผลวิเคราะห์เรียบร้อย' + (selectedIds.length>0 ? ' ('+selectedIds.length+' โรงเรียน)' : ''), 'ok');
+}
+
+function buildPromptText(selected){
+  const labels = {done:'ดำเนินการแล้ว', prog:'ระหว่างดำเนินการ', nyet:'ยังไม่ได้ดำเนินการ'};
+  const lines = [];
+  lines.push('คุณคือผู้เชี่ยวชาญด้านการนิเทศการศึกษา ฉันจะให้ข้อมูลผลการนิเทศ ติดตาม สถานศึกษา สพป.เชียงใหม่ เขต 2 ภาคเรียนที่ 1/2569 จำนวน ' + selected.length + ' โรงเรียน ขอให้วิเคราะห์และสรุปผลเป็นภาษาไทย ครอบคลุมหัวข้อต่อไปนี้');
+  lines.push('');
+  lines.push('# หัวข้อที่ต้องการ');
+  lines.push('1. สรุปภาพรวมผลการนิเทศ (สถิติ % แต่ละสถานะ)');
+  lines.push('2. ด้านและประเด็นที่ต้องเร่งพัฒนา (จัดลำดับความเร่งด่วน พร้อมเหตุผล)');
+  lines.push('3. จุดแข็งที่พบในภาพรวม');
+  lines.push('4. ข้อเสนอแนะเชิงปฏิบัติ ระยะสั้น (1-3 เดือน) / กลาง (3-6 เดือน) / ยาว (6-12 เดือน)');
+  lines.push('5. สรุปรายงาน 1 หน้าสำหรับผู้บริหาร');
+  lines.push('');
+  lines.push('=== ข้อมูลผลการนิเทศ ===');
+  lines.push('');
+  selected.forEach(function(rec){
+    const c = countRecord(rec);
+    const missing = getMissingItems(rec);
+    lines.push('--- โรงเรียน: ' + rec.info.schoolName + ' ---');
+    lines.push('ผู้บริหาร: ' + (rec.info.principal||'-') + ' | ผู้นิเทศ: ' + (rec.info.supervisor||'-') + ' | วันที่: ' + (rec.info.visitDate||'-'));
+    lines.push('สรุป: ดำเนินการแล้ว ' + c.done + ' | ระหว่างดำเนินการ ' + c.prog + ' | ยังไม่ได้ดำเนินการ ' + c.nyet + ' | ไม่ได้ระบุ ' + missing.length + ' / ทั้งหมด ' + TOTAL);
+    lines.push('');
+    SECS.forEach(function(s){
+      lines.push('[' + s.title + ']');
+      s.items.forEach(function(i){
+        const st = rec.items[i.id];
+        const statusLabel = (st && st.v) ? labels[st.v] : 'ไม่ได้ระบุ';
+        let line = '  ' + i.id + ': [' + statusLabel + '] ' + i.label;
+        if(st && st.p) line += ' (ร้อยละ ' + st.p + ')';
+        if(st && st.n) line += '\n    หมายเหตุ: ' + st.n;
+        lines.push(line);
+      });
+      lines.push('');
+    });
+  });
+  lines.push('=== จบข้อมูล ===');
+  lines.push('โปรดวิเคราะห์และสรุปผลตามที่ขอ ใช้ภาษาไทยที่เป็นทางการ กระชับ และตรงประเด็น');
+  return lines.join('\n');
+}
+
+
+function buildPrompt(){
+  if(schools.length === 0){ toast('ยังไม่มีข้อมูลโรงเรียน', 'err'); return; }
+  const radioEl2 = document.querySelector('input[name="ai-school-radio"]:checked');
+  if(!radioEl2){ toast('กรุณาเลือกโรงเรียก่อน', 'err'); return; }
+  const selRec2 = schools.find(function(s){ return s.id === radioEl2.value; });
+  if(!selRec2){ toast('ไม่พบข้อมูลโรงเรียน', 'err'); return; }
+  const selected = [selRec2];
+  document.getElementById('promptBox').textContent = buildPromptText(selected);
+  toast('✓ สร้าง Prompt เรียบร้อย', 'ok');
+}
+
+function copyPrompt(){
+  const txt = document.getElementById('promptBox').textContent;
+  if(!txt || txt.startsWith('กด')) return;
+  navigator.clipboard.writeText(txt)
+    .then(function(){ toast('✓ คัดลอก Prompt แล้ว', 'ok'); })
+    .catch(function(){ toast('ไม่สามารถคัดลอกได้ กรุณาเลือกข้อความเอง'); });
+}
+
+function markdownToHtml(text){
+  const lines = text.split('\n');
+  let out = '', inUl = false, inOl = false;
+  function close(){ if(inUl){ out += '</ul>'; inUl=false; } if(inOl){ out += '</ol>'; inOl=false; } }
+  function esc(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  }
+  lines.forEach(function(raw){
+    const t = raw.trim();
+    if(!t){ close(); out += '<div style="height:5px"></div>'; return; }
+    if(/^---+$/.test(t)){ close(); out += '<hr/>'; return; }
+    if(/^# /.test(t)){ close(); out += '<h1>'+esc(t.slice(2))+'</h1>'; return; }
+    if(/^## /.test(t)){ close(); out += '<h2>'+esc(t.slice(3))+'</h2>'; return; }
+    if(/^### /.test(t)){ close(); out += '<h3>'+esc(t.slice(4))+'</h3>'; return; }
+    const olm = t.match(/^(\d+)\. (.+)/);
+    if(olm){ if(inUl){out+='</ul>';inUl=false;} if(!inOl){out+='<ol>';inOl=true;} out+='<li>'+esc(olm[2])+'</li>'; return; }
+    if(/^[-*] /.test(t)){ if(inOl){out+='</ol>';inOl=false;} if(!inUl){out+='<ul>';inUl=true;} out+='<li>'+esc(t.slice(2))+'</li>'; return; }
+    close();
+    out += '<p>'+esc(t)+'</p>';
+  });
+  close();
+  return out;
+}
+
+
+
+
+
+// ════════════════════════════════════════════════════════
+//  QUALITATIVE ANALYSIS — เก็บและแสดงผลวิเคราะห์รายโรงเรียน
+// ════════════════════════════════════════════════════════
+
+function renderQualAnalysisList(){
+  const c = document.getElementById('aiSchoolList');
+  if(!c) return;
+  if(schools.length===0){
+    c.innerHTML='<div style="color:var(--t4);font-size:13px;padding:4px 0">ยังไม่มีข้อมูลโรงเรียน กรอกข้อมูลก่อนใช้งาน</div>';
+    return;
+  }
+  // ใช้ radio button — เลือกได้ทีละ 1 โรงเรียนเท่านั้น
+  c.innerHTML = schools.map(function(rec, idx){
+    const total = countRecord(rec).total;
+    const pct   = Math.round(total/TOTAL*100);
+    const hasResult = rec.qualAnalysis && rec.qualAnalysis.text;
+    const savedDate = hasResult ? new Date(rec.qualAnalysis.savedAt).toLocaleDateString('th-TH') : '';
+    const isFirst   = idx === 0;
+    return '<div class="scope-item" style="align-items:flex-start;gap:10px;flex-wrap:nowrap">'
+      + '<input type="radio" name="ai-school-radio" id="ai-chk-'+rec.id+'" value="'+rec.id+'"'+(isFirst?' checked':'')+' style="width:16px;height:16px;margin-top:2px;accent-color:var(--navy);cursor:pointer;flex-shrink:0"/>'
+      + '<label for="ai-chk-'+rec.id+'" style="flex:1;cursor:pointer">'
+        + '<div style="font-size:13px;color:var(--t2);font-weight:500">'+rec.info.schoolName+'</div>'
+        + '<div style="font-size:11.5px;color:var(--t4);margin-top:2px">'
+          + (rec.info.visitDate||'') + (rec.info.supervisor?' · '+rec.info.supervisor:'')
+          + ' · '+total+'/'+TOTAL+' ประเด็น ('+pct+'%)'
+        + '</div>'
+        + (hasResult?'<div style="font-size:11px;color:var(--done);margin-top:3px;font-weight:600">✓ มีผลวิเคราะห์บันทึกแล้ว ('+savedDate+')</div>':'')
+      + '</label>'
+      + (hasResult?'<button class="qual-view-btn" data-id="'+rec.id+'" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--prog-b);background:var(--prog-bg);color:var(--prog);cursor:pointer;white-space:nowrap;flex-shrink:0">📊 ดูผล</button>':'')
+      + '</div>';
+  }).join('');
+  // event delegation for qual view buttons
+  c.querySelectorAll('.qual-view-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      viewQualAnalysis(btn.getAttribute('data-id'));
+    });
+  });
+}
+
+
+
+// บันทึกผลวิเคราะห์เชิงคุณภาพ เมื่อกด "แสดงผลวิเคราะห์"
+function saveQualAnalysisToSchool(text, selectedIds){
+  if(!selectedIds || selectedIds.length === 0) return;
+  selectedIds.forEach(function(id){
+    const idx = schools.findIndex(function(s){ return s.id === id; });
+    if(idx >= 0){
+      schools[idx].qualAnalysis = { text: text, savedAt: new Date().toISOString() };
+    }
+  });
+  saveSchoolsLocal();
+}
+
+// ดูผลวิเคราะห์เชิงคุณภาพของโรงเรียนที่เลือก
+function viewQualAnalysis(schoolId){
+  const rec = schools.find(function(s){ return s.id === schoolId; });
+  if(!rec || !rec.qualAnalysis) return;
+  document.getElementById('aiResultTitle').textContent = 'ผลวิเคราะห์เชิงคุณภาพ — ' + rec.info.schoolName;
+  document.getElementById('aiResultMeta').textContent = 'บันทึกเมื่อ ' + new Date(rec.qualAnalysis.savedAt).toLocaleString('th-TH');
+  document.getElementById('aiResultBody').innerHTML = markdownToHtml(rec.qualAnalysis.text);
+  document.getElementById('aiEmptyState').style.display = 'none';
+  document.getElementById('aiResultDisplay').style.display = 'block';
+  goPage('ai');
+  document.getElementById('aiResultDisplay').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+</script>
+</body>
+</html>
