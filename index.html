@@ -840,7 +840,15 @@ function saveSchool(){
   saveSchoolsLocal();
   toast('✓ บันทึก "'+currentInfo.schoolName+'" เรียบร้อย — กด ↓ ส่งออกเพื่อเก็บข้อมูลถาวร', 'ok');
   renderDashboard();
-  fetch('https://script.google.com/macros/s/AKfycbzVxApzePFneC7vaBFIoYXwJCLa6R3lAsMBWnyxQImgD2NExmRuyyB-zcnBinrpCYSibw/exec',{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildSheetRow(rec))}).catch(function(){});
+  // ส่งข้อมูลไป Google Sheets (no-cors ต้องใช้ text/plain)
+  const sheetData = buildSheetRow(rec);
+  const formData  = new FormData();
+  formData.append('data', JSON.stringify(sheetData));
+  fetch('https://script.google.com/macros/s/AKfycbzVxApzePFneC7vaBFIoYXwJCLa6R3lAsMBWnyxQImgD2NExmRuyyB-zcnBinrpCYSibw/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  }).catch(function(){});
 }
 function buildSheetRow(rec){
   const row = [rec.savedAt, rec.info.visitDate, rec.info.schoolName, rec.info.network, rec.info.principal, rec.info.supervisor];
@@ -954,16 +962,7 @@ function renderDashboard(){
         + '</div>';
     }).join('');
     // ผูก event listeners หลัง render — หลีกเลี่ยงปัญหา escaping ทั้งหมด
-    tb.querySelectorAll('.sch-action').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const id = btn.getAttribute('data-id');
-        const action = btn.getAttribute('data-action');
-        if(action==='view') viewSchool(id);
-        else if(action==='edit') editSchool(id);
-        else if(action==='delete') deleteSchool(id);
-        else if(action==='qual') viewQualAnalysis(id);
-      });
-    });
+
   }
   const cb=document.getElementById('ctaBox');
   if(cb) cb.style.display = n>0?'none':'block';
@@ -1124,6 +1123,34 @@ function toast(msg, type){
 }
 function set(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
 function setW(id,v){ const el=document.getElementById(id); if(el) el.style.width=v+'%'; }
+
+// ════════════════════════════════════════════════
+//  Permanent event delegation — ทำงานแม้ innerHTML ถูก re-render
+// ════════════════════════════════════════════════
+document.addEventListener('click', function(e){
+  // ปุ่ม ดู/แก้ไข/ลบ/qual ในตาราง dashboard
+  const schBtn = e.target.closest('.sch-action');
+  if(schBtn){
+    const id     = schBtn.getAttribute('data-id');
+    const action = schBtn.getAttribute('data-action');
+    if(action === 'view')   viewSchool(id);
+    if(action === 'edit')   editSchool(id);
+    if(action === 'delete') deleteSchool(id);
+    if(action === 'qual')   viewQualAnalysis(id);
+  }
+  // ปุ่ม ดูผลวิเคราะห์ ใน aiSchoolList
+  const qualBtn = e.target.closest('.qual-view-btn');
+  if(qualBtn){
+    viewQualAnalysis(qualBtn.getAttribute('data-id'));
+  }
+  // ปุ่ม ดูผลเชิงคุณภาพ ใน modal
+  const modalBtn = e.target.closest('.modal-qual-btn');
+  if(modalBtn){
+    closeModalDirect();
+    viewQualAnalysis(modalBtn.getAttribute('data-school-id'));
+  }
+});
+
 // INIT
 loadSchools();
 buildForm();
