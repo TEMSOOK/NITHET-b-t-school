@@ -1030,11 +1030,7 @@ function viewSchool(id){
 }
 function closeModal(e){ if(e.target===document.getElementById('modalBg')) closeModalDirect(); }
 function closeModalDirect(){ document.getElementById('modalBg').classList.remove('open'); }
-// delegate qual button click inside modal
-document.getElementById('modalBg').addEventListener('click', function(e){
-  const btn = e.target.closest('.modal-qual-btn');
-  if(btn){ closeModalDirect(); viewQualAnalysis(btn.getAttribute('data-school-id')); }
-});
+
 
 
 function buildPrompt(){
